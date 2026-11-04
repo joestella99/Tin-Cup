@@ -63,4 +63,14 @@ Rails MVC + PostgreSQL + Hotwire/importmap. Trip owns players and rounds; a scor
 
 ## Deployment boundary
 
-This initial release is a shared organizer workspace: anyone with the password can manage every trip on that instance. It is not yet a public multi-tenant service. Keep the password private and use HTTPS in production. Production needs `SECRET_KEY_BASE`, `DATABASE_URL`, and `ORGANIZER_PASSWORD`; use Rails' standard production server setup and run `db:prepare` during release. No deployment is provisioned by this repository.
+This initial release is a shared organizer workspace: anyone with the password can manage every trip on that instance. It is not yet a public multi-tenant service. Keep the password private and use HTTPS in production. Production needs `SECRET_KEY_BASE`, `DATABASE_URL`, and `ORGANIZER_PASSWORD`; use Rails' standard production server setup and run `db:prepare` during release. `render.yaml` defines a Render Rails service and a shared PostgreSQL database.
+
+## Deploy on Render
+
+Use the repository's `render.yaml` as a Render Blueprint, or open [Deploy to Render](https://render.com/deploy?repo=https://github.com/joestella99/Tin-Cup). Set a private `ORGANIZER_PASSWORD` in Render when prompted. The blueprint generates `SECRET_KEY_BASE` and wires the database URL without committing either secret.
+
+The build installs gems and precompiles production assets. Startup checks required environment variables, prepares the database, and starts Puma on Render's assigned port. Demo seeds are not loaded in production. Sign in with the organizer password and create your first trip.
+
+The initial configuration uses **free** plans. Free web instances may sleep between visits, and **Render's free PostgreSQL database expires after 30 days**. Upgrade the database before relying on this instance for ongoing trip records. No paid resources are selected by this blueprint.
+
+The deployment configuration is committed; a live deployment still requires a connected Render account and successful provisioning. Verify `/up`, sign-in, trip creation, and persistence after a restart before sharing it with the group.
