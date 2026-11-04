@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>Tin Cup · The trip is the tournament</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <%= csrf_meta_tags %>
+    <%= csp_meta_tag %>
+    <%= stylesheet_link_tag "application", "data-turbo-track": "reload" %>
+    <%= javascript_importmap_tags %>
+  </head>
+  <body>
+    <header class="site-header"><%= link_to "⚑ TIN CUP", root_path, class: "brand" %><span class="tagline">GOOD FRIENDS. QUESTIONABLE GOLF.</span><% if session[:organizer] %><%= button_to "Sign out", session_path, method: :delete, class: "text-button" %><% end %></header>
+    <main>
+      <% flash.each do |type, message| %><div class="flash <%= type %>" role="status"><%= message %></div><% end %>
+      <%= yield %>
+    </main>
+    <footer>Built for the weekend you talk about all year. <span>TIN CUP / EST. 2026</span></footer>
+  </body>
+</html>

@@ -1,0 +1,2 @@
+<section class="hero compact"><p class="eyebrow">THE GROUP'S HOME COURSE</p><h1>Your trip.<br>Your tournament.</h1><p class="lede">Plan the rounds, settle the scores, and take home the cup.</p></section>
+<section class="panel narrow"><h2>Organizer sign in</h2><p>Use the password configured for your group's workspace.</p><%= form_with url: session_path do |form| %><%= form.label :password, "Organizer password" %><%= form.password_field :password, required: true, autocomplete: "current-password" %><%= form.submit "Enter the clubhouse", class: "button" %><% end %></section>

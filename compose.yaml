@@ -1,0 +1,26 @@
+services:
+  db:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: tin_cup
+      POSTGRES_PASSWORD: local-development-only
+      POSTGRES_DB: tin_cup_development
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U tin_cup -d tin_cup_development"]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+  web:
+    build: .
+    ports:
+      - "3000:3000"
+    environment:
+      DATABASE_URL: postgres://tin_cup:local-development-only@db/tin_cup_development
+      ORGANIZER_PASSWORD: ${ORGANIZER_PASSWORD:?Set ORGANIZER_PASSWORD before starting}
+    depends_on:
+      db:
+        condition: service_healthy
+volumes:
+  postgres_data:
