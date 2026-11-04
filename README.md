@@ -2,7 +2,19 @@
 
 **The trip is the tournament.** A Ruby on Rails workspace for a group of buddies' annual golf competition.
 
-## First playable slice
+## Trip cup and hole-by-hole scoring
+
+- Create any number of teams with any number of players; no fixed two-team limit.
+- Assign players to teams, then pair singles matches between any two different teams.
+- New hole-by-hole rounds start with an 18-hole course setup. Confirm the actual par and stroke indexes before scoring; placeholder values are not presented as real course data.
+- Enter one hole at a time for the group. Individual totals and match standings recalculate on save.
+- Match play uses the difference between players' agreed playing handicaps. Wins earn one cup point, ties earn half a point each; unfinished matches award no points.
+- Teams share one points table across all rounds. Equal points are tied. Organizers schedule a balanced number of matches per team; there is no automatic bracket or round-robin generator.
+- Match results use consecutive scored holes from hole 1 and finish when a player is mathematically ahead, or after 18 holes. Later corrections recalculate the result.
+- Course details lock after scoring or pairing starts. Teams and handicaps lock for paired players. Unplayed pairings can be removed before either player has entered scores.
+- Individual trip standings count only completed 18-hole rounds. Existing total-score rounds remain supported.
+
+## Foundation
 
 - Password-protected organizer workspace, with session rotation and login rate limiting.
 - Create trips, add players with agreed playing handicaps, and schedule rounds within trip dates.
@@ -45,7 +57,7 @@ GitHub Actions runs the suite with PostgreSQL. Ruby, Rails, and gem versions are
 
 ## Scoring rules in v1
 
-Every round is 18 holes of individual stroke play. Net = gross strokes minus the player's agreed playing handicap for that round. The same allowance applies to every round in this version. A negative allowance represents a plus handicap. This is **not** an official handicap-index-to-course-handicap calculator.
+Individual standings use 18-hole net stroke play. Rounds can use total-score entry or hole-by-hole entry with optional singles matches. Net = gross strokes minus the player's agreed playing handicap for that round. The same allowance applies to every round in this version. A negative allowance represents a plus handicap. This is **not** an official handicap-index-to-course-handicap calculator.
 
 Trip standings use the sum of recorded net totals. Only players with a score for every scheduled round receive a placement; equal totals share a place. Pending players are grouped by rounds completed before net score so fewer rounds never imply a lead. A blank score removes an entry. Handicaps lock once a player has scores, to prevent retroactive changes to results.
 
@@ -55,11 +67,11 @@ Rails MVC + PostgreSQL + Hotwire/importmap. Trip owns players and rounds; a scor
 
 ## Next milestones
 
-1. Hole-by-hole scorecards and per-round tees/course handicaps.
-2. Two-team trip cups, singles match play, pairings, and match points.
-3. Best ball, scramble, and mixed-format trip totals.
+1. Per-round tees and playing-handicap allowances.
+2. Best ball, scramble, and mixed-format trip totals.
+3. Round-robin pairing suggestions for competitions with several teams.
 4. Individual accounts, trip-scoped permissions, and invitation links.
-5. Live leaderboard broadcasts and past-trip champions.
+5. Leaderboard broadcasts and past-trip champions.
 
 ## Deployment boundary
 

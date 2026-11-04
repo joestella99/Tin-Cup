@@ -1,4 +1,5 @@
 class Trip < ApplicationRecord
+  has_many :teams, dependent: :destroy
   has_many :players, dependent: :destroy
   has_many :rounds, dependent: :destroy
   validates :name, :destination, :starts_on, :ends_on, presence: true

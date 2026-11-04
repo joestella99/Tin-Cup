@@ -1,0 +1,23 @@
+<section class="panel">
+<p class="eyebrow">THE TRAVELING PARTY</p>
+<h2>Team roster</h2>
+<p class="muted">Assign any number of players to each team. Once a player is paired, their team and handicap are locked to keep results consistent.</p>
+<div class="roster-grid">
+<% trip.players.includes(:team).order(:name).each do |player| %>
+<article class="roster-player">
+<div>
+<strong>
+<%= player.name %>
+</strong>
+<small>Playing handicap <%= player.playing_handicap %>
+</small>
+</div>
+<%= form_with model: [trip, player] do |f| %>
+<%= f.label :team_id, "Team for #{player.name}", class: "visually-hidden" %>
+<%= f.collection_select :team_id, teams, :id, :name, include_blank: "Unassigned" %>
+<%= f.submit "Assign", class: "small-button" %>
+<% end %>
+</article>
+<% end %>
+</div>
+</section>

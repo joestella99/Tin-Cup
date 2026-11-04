@@ -1,0 +1,82 @@
+<% unless @round.course_confirmed? %>
+<section class="panel course-notice">
+<p class="eyebrow">BEFORE THE FIRST TEE</p>
+<h2>Confirm your course card</h2>
+<p>Set each hole's par and stroke index from the actual course scorecard. These control where handicap strokes fall in matches.</p>
+<%= link_to "Set up the 18 holes ↗", edit_trip_round_course_card_path(@trip, @round), class: "button" %>
+</section>
+<% else %>
+<section class="panel">
+<div class="section-heading cup-heading">
+<div>
+<p class="eyebrow">ONE HOLE AT A TIME</p>
+<h2>The scorecard</h2>
+</div>
+<%= link_to "View course card", edit_trip_round_course_card_path(@trip, @round), class: "back" %>
+</div>
+<nav class="hole-nav" aria-label="Choose hole">
+<% @round.holes.order(:number).each do |hole| %>
+<%= link_to hole.number, trip_round_path(@trip, @round, hole: hole.number), class: "hole-chip #{'selected' if hole == @hole}", aria: {current: hole == @hole ? "page" : nil} %>
+<% end %>
+</nav>
+<% if @hole %>
+<div class="hole-heading">
+<h3>Hole <%= @hole.number %>
+</h3>
+<span>Par <%= @hole.par %> · Stroke index <%= @hole.stroke_index %>
+</span>
+</div>
+<p class="muted">Enter gross strokes. Blank clears a saved score. Partial rounds stay pending in the individual trip standings. Match results use consecutive completed holes from the first tee.</p>
+<%= form_with url: trip_round_hole_hole_scores_path(@trip, @round, @hole), method: :patch do %>
+<div class="table-scroll">
+<table>
+<thead>
+<tr>
+<th>Player</th>
+<th>This hole</th>
+<th>Holes scored</th>
+<th>Gross so far</th>
+<th>Net so far</th>
+</tr>
+</thead>
+<tbody>
+<% @players.each do |player| %>
+<% result = @results[player.id] %>
+<tr>
+<td>
+<%= label_tag "hole_score_#{player.id}", player.name %>
+<small>
+<%= player.team&.name || "Unassigned" %> · HCP <%= player.playing_handicap %>
+</small>
+</td>
+<td>
+<%= number_field_tag "strokes[#{player.id}]", @hole_scores[player.id]&.strokes, id: "hole_score_#{player.id}", min: 1, max: 30, step: 1, inputmode: "numeric", class: "score-input" %>
+</td>
+<td>
+<%= result&.holes_played || 0 %>/18</td>
+<td>
+<%= result&.gross || "—" %>
+</td>
+<td class="net">
+<%= result&.net || "—" %>
+</td>
+</tr>
+<% end %>
+</tbody>
+</table>
+</div>
+<%= submit_tag "Save hole #{@hole.number} ↗", class: "button" %>
+<% end %>
+<div class="hole-pagination">
+<% if @hole.number > 1 %>
+<%= link_to "← Previous hole", trip_round_path(@trip, @round, hole: @hole.number - 1) %>
+<% end %>
+<% if @hole.number < 18 %>
+<%= link_to "Next hole →", trip_round_path(@trip, @round, hole: @hole.number + 1) %>
+<% end %>
+</div>
+<% else %>
+<p>Choose a hole above.</p>
+<% end %>
+</section>
+<% end %>

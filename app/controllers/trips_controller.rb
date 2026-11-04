@@ -19,6 +19,8 @@ class TripsController < ApplicationController
   def show
     @trip = Trip.find(params[:id])
     @entries = Leaderboard.for(@trip)
+    @cup_entries = CupStandings.for(@trip)
+    @teams = @trip.teams.order(:name)
     @rounds = @trip.rounds.order(:plays_on, :id)
   end
 end

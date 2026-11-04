@@ -1,2 +1,8 @@
 <%= link_to "← Back to the trip", trip_path(@trip), class: "back" %><section class="hero compact"><p class="eyebrow"><%= @trip.name %> / <%= @round.plays_on.strftime("%A, %b %-d") %></p><h1><%= @round.course %></h1><p class="lede">Finish the round. Make it official.</p></section>
+<% if @round.hole_by_hole? %>
+  <%= render "hole_card" %>
+  <%= render "matches" %>
+<% else %>
 <section class="panel"><h2>The scorecard</h2><p class="muted">Enter each player's total gross strokes for all 18 holes. Net = gross − agreed playing handicap. Blank fields clear previously saved scores. All scores save together.</p><% if @players.empty? %><p>Add players from the trip page before recording scores.</p><% else %><%= form_with url: trip_round_scorecard_path(@trip, @round), method: :patch do %><div class="table-scroll"><table><thead><tr><th>Player</th><th>Playing handicap</th><th>Gross strokes</th><th>Saved net</th></tr></thead><tbody><% @players.each do |player| %><% score = @scores[player.id] %><tr><td><%= label_tag "score_#{player.id}", player.name %></td><td><%= player.playing_handicap %></td><td><%= number_field_tag "scores[#{player.id}]", score&.gross, id: "score_#{player.id}", min: 1, max: 300, step: 1, class: "score-input" %></td><td class="net"><%= score&.net || "—" %></td></tr><% end %></tbody></table></div><%= submit_tag "Save round scores ↗", class: "button" %><% end %><% end %></section>
+
+<% end %>

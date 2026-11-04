@@ -1,0 +1,58 @@
+<section class="panel">
+<p class="eyebrow">THE HEAD-TO-HEADS</p>
+<h2>Singles matches</h2>
+<p class="muted">Pair players from different teams. Each player can play one singles match per round. The higher-handicap player receives the difference in allowances, allocated by stroke index.</p>
+<div class="match-grid">
+<% @matches.each do |match| %>
+<% result = MatchResult.for(match) %>
+<article class="match-card">
+<span class="match-status <%= result.status %>">
+<%= result.status.to_s.upcase %>
+</span>
+<h3>
+<%= match.home_player.name %>
+<small>vs</small>
+<%= match.away_player.name %>
+</h3>
+<p>
+<%= match.home_player.team.name %> / <%= match.away_player.team.name %>
+</p>
+<strong>
+<% if result.status == :scheduled %>First tee awaits<% elsif result.leader.nil? %>
+<%= result.status == :final ? "Match tied · ½ point each" : "All square" %>
+<% else %>
+<%= result.leader.name %>
+<%= result.status == :final ? "wins" : "leads" %>
+<%= result.margin %>
+<%= result.status == :final && result.through < 18 ? " & #{18 - result.through}" : (result.status == :final ? " up" : " up") %>
+<% end %>
+</strong>
+<small>Through <%= result.through %> holes<%= " · 1 cup point" if result.status == :final && result.leader %>
+</small>
+<% unless @round.hole_scores.where(player_id: [match.home_player_id, match.away_player_id]).exists? %>
+<%= button_to "Remove pairing", trip_round_match_path(@trip, @round, match), method: :delete, class: "text-button remove-pairing", form: {data: {turbo_confirm: "Remove this unplayed pairing?"}} %>
+<% end %>
+</article>
+<% end %>
+</div>
+<% if @round.course_confirmed? && @available_players.size >= 2 %>
+<details class="setup-details">
+<summary>Pair a singles match</summary>
+<%= form_with model: [@trip, @round, Match.new] do |f| %>
+<div class="form-grid">
+<div>
+<%= f.label :home_player_id, "First player" %>
+<%= f.select :home_player_id, @available_players.map { |p| ["#{p.name} · #{p.team.name}", p.id] }, prompt: "Choose a player" %>
+</div>
+<div>
+<%= f.label :away_player_id, "Opponent" %>
+<%= f.select :away_player_id, @available_players.map { |p| ["#{p.name} · #{p.team.name}", p.id] }, prompt: "Choose another team's player" %>
+</div>
+</div>
+<%= f.submit "Add match", class: "button" %>
+<% end %>
+</details>
+<% elsif @matches.empty? %>
+<p class="empty">Confirm the course card and assign players to at least two teams to start pairing.</p>
+<% end %>
+</section>

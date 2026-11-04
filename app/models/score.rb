@@ -4,6 +4,7 @@ class Score < ApplicationRecord
   validates :gross, numericality: { only_integer: true, greater_than: 0, less_than_or_equal_to: 300 }
   validates :player_id, uniqueness: { scope: :round_id }
   validate :same_trip
+  validate { errors.add(:round, "uses hole-by-hole scoring") if round&.hole_by_hole? }
 
   def net
     gross - player.playing_handicap

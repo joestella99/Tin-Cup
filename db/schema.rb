@@ -10,9 +10,46 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_11_04_000000) do
+ActiveRecord::Schema[8.1].define(version: 2026_11_04_010000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
+
+  create_table "hole_scores", force: :cascade do |t|
+    t.bigint "hole_id", null: false
+    t.bigint "player_id", null: false
+    t.integer "strokes", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["hole_id", "player_id"], name: "index_hole_scores_on_hole_id_and_player_id", unique: true
+    t.index ["hole_id"], name: "index_hole_scores_on_hole_id"
+    t.index ["player_id"], name: "index_hole_scores_on_player_id"
+    t.check_constraint "strokes >= 1 AND strokes <= 30", name: "hole_scores_strokes_range"
+  end
+
+  create_table "holes", force: :cascade do |t|
+    t.bigint "round_id", null: false
+    t.integer "number", null: false
+    t.integer "par", default: 4, null: false
+    t.integer "stroke_index", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["round_id", "number"], name: "index_holes_on_round_id_and_number", unique: true
+    t.index ["round_id", "stroke_index"], name: "index_holes_on_round_id_and_stroke_index", unique: true
+    t.index ["round_id"], name: "index_holes_on_round_id"
+    t.check_constraint "number >= 1 AND number <= 18 AND par >= 3 AND par <= 6 AND stroke_index >= 1 AND stroke_index <= 18", name: "holes_valid_ranges"
+  end
+
+  create_table "matches", force: :cascade do |t|
+    t.bigint "round_id", null: false
+    t.bigint "home_player_id", null: false
+    t.bigint "away_player_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["away_player_id"], name: "index_matches_on_away_player_id"
+    t.index ["home_player_id"], name: "index_matches_on_home_player_id"
+    t.index ["round_id"], name: "index_matches_on_round_id"
+    t.check_constraint "home_player_id <> away_player_id", name: "matches_distinct_players"
+  end
 
   create_table "players", force: :cascade do |t|
     t.bigint "trip_id", null: false
@@ -20,6 +57,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_04_000000) do
     t.integer "playing_handicap", default: 0, null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.bigint "team_id"
+    t.index ["team_id"], name: "index_players_on_team_id"
     t.index ["trip_id", "name"], name: "index_players_on_trip_id_and_name", unique: true
     t.index ["trip_id"], name: "index_players_on_trip_id"
     t.check_constraint "playing_handicap >= '-10'::integer AND playing_handicap <= 54", name: "players_handicap_range"
@@ -31,6 +70,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_04_000000) do
     t.date "plays_on", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "scoring_mode", default: "total", null: false
+    t.boolean "course_confirmed", default: false, null: false
     t.index ["trip_id"], name: "index_rounds_on_trip_id"
   end
 
@@ -46,6 +87,15 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_04_000000) do
     t.check_constraint "gross > 0", name: "scores_positive_gross"
   end
 
+  create_table "teams", force: :cascade do |t|
+    t.bigint "trip_id", null: false
+    t.string "name", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["trip_id", "name"], name: "index_teams_on_trip_id_and_name", unique: true
+    t.index ["trip_id"], name: "index_teams_on_trip_id"
+  end
+
   create_table "trips", force: :cascade do |t|
     t.string "name", null: false
     t.string "destination", null: false
@@ -55,8 +105,16 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_04_000000) do
     t.datetime "updated_at", null: false
   end
 
+  add_foreign_key "hole_scores", "holes"
+  add_foreign_key "hole_scores", "players"
+  add_foreign_key "holes", "rounds"
+  add_foreign_key "matches", "players", column: "away_player_id"
+  add_foreign_key "matches", "players", column: "home_player_id"
+  add_foreign_key "matches", "rounds"
+  add_foreign_key "players", "teams"
   add_foreign_key "players", "trips"
   add_foreign_key "rounds", "trips"
   add_foreign_key "scores", "players"
   add_foreign_key "scores", "rounds"
+  add_foreign_key "teams", "trips"
 end

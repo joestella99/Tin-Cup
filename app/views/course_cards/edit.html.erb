@@ -1,0 +1,48 @@
+<%= link_to "← Back to round", trip_round_path(@trip, @round), class: "back" %>
+<section class="hero compact">
+<p class="eyebrow">
+<%= @round.course %>
+</p>
+<h1>The course card.</h1>
+<p class="lede">Take the par and stroke index from your actual 18-hole scorecard. Each stroke index from 1 to 18 must appear once.</p>
+</section>
+<% locked = @round.hole_scores.exists? || @round.matches.exists? %>
+<section class="panel narrow">
+<h2>
+<%= locked ? "Confirmed card" : "Set up the holes" %>
+</h2>
+<p class="muted">
+<%= locked ? "Course details are locked because scoring or pairing has begun." : "The starting values are placeholders. Check every hole before confirming." %>
+</p>
+<%= form_with url: trip_round_course_card_path(@trip, @round), method: :patch do %>
+<table>
+<thead>
+<tr>
+<th>Hole</th>
+<th>Par</th>
+<th>Stroke index</th>
+</tr>
+</thead>
+<tbody>
+<% @holes.each do |hole| %>
+<tr>
+<td>
+<%= hole.number %>
+</td>
+<td>
+<%= label_tag "par_#{hole.id}", "Hole #{hole.number} par", class: "visually-hidden" %>
+<%= number_field_tag "holes[#{hole.id}][par]", hole.par, id: "par_#{hole.id}", min: 3, max: 6, required: true, disabled: locked, class: "score-input" %>
+</td>
+<td>
+<%= label_tag "index_#{hole.id}", "Hole #{hole.number} stroke index", class: "visually-hidden" %>
+<%= number_field_tag "holes[#{hole.id}][stroke_index]", hole.stroke_index, id: "index_#{hole.id}", min: 1, max: 18, required: true, disabled: locked, class: "score-input" %>
+</td>
+</tr>
+<% end %>
+</tbody>
+</table>
+<% unless locked %>
+<%= submit_tag "Confirm course card", class: "button" %>
+<% end %>
+<% end %>
+</section>

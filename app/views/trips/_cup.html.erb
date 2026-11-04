@@ -1,0 +1,43 @@
+<section class="panel cup-panel">
+<div class="section-heading cup-heading">
+<div>
+<p class="eyebrow">EVERY TEAM. ONE CUP.</p>
+<h2>The trip cup</h2>
+</div>
+<span>Singles match play · Win 1 / Tie ½</span>
+</div>
+<% if teams.any? %>
+<div class="team-grid">
+<% entries.each_with_index do |entry, index| %>
+<article class="team-tile">
+<p class="eyebrow">TEAM <%= "%02d" % (index + 1) %>
+</p>
+<h3>
+<%= entry.team.name %>
+</h3>
+<strong class="cup-points">
+<%= number_with_precision(entry.points, precision: 1, strip_insignificant_zeros: true) %>
+<small>points</small>
+</strong>
+<p>
+<%= entry.played %> played · <%= entry.won %> won · <%= entry.tied %> tied</p>
+</article>
+<% end %>
+</div>
+<% else %>
+<p class="muted">Two teams or twenty. Add your teams, assign the group, then set singles pairings on each hole-by-hole round.</p>
+<% end %>
+<p class="muted">Points count only when a match is final. Teams on equal points are tied. For a balanced cup, schedule the same number of matches per team; pairings are set by the organizer.</p>
+<details class="setup-details">
+<summary>
+<%= teams.any? ? "Add another team" : "Add the first team" %>
+</summary>
+<%= form_with model: [trip, Team.new], class: "inline-form" do |f| %>
+<div>
+<%= f.label :name, "Team name" %>
+<%= f.text_field :name, required: true, placeholder: "The Sandbaggers" %>
+</div>
+<%= f.submit "Add team", class: "button" %>
+<% end %>
+</details>
+</section>
