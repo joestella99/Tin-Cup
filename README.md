@@ -2,6 +2,19 @@
 
 **The trip is the tournament.** A Ruby on Rails workspace for a group of buddies' annual golf competition.
 
+## Accounts, private trips, and invitations
+
+- Create a personal account with a name, email identifier, and a password of at least 12 characters. Passwords use Rails `has_secure_password` with bcrypt.
+- New trips belong to the account that creates them. Other accounts cannot list or open them without an invitation.
+- Organizers create, replace, or revoke a signed invitation link. Links expire after 14 days. Joining grants scorer access only; it never transfers ownership.
+- Scorers can read their trips and enter group scores, while only the owner manages rosters, teams, course cards, pairings, invitations, and membership.
+- Revoking an invite prevents future joins. Remove an existing member separately to end their current access; revoke active links too if they should not rejoin.
+- Logins expire after 14 days and are tracked in the database. Logout deletes the current login; account recovery invalidates all previous logins.
+- Signup displays a high-entropy recovery code once. Only its SHA-256 digest is saved. Recovery consumes the old code and issues a replacement. An authenticated user can replace a lost code from their account page after confirming their current password.
+- No email delivery or address verification is configured. Email is a sign-in identifier, and the saved recovery code is the recovery method. Do not imply that a reset email has been sent.
+- Existing shared-organizer access remains under **Existing organizer access** on the sign-in page. It can access only trips without an owner. Create/sign in to a personal account from that session, then claim each old trip to enable private invitations. Claimed trips disappear from shared-organizer access.
+- All nested resource actions check trip membership and organizer permissions on the server. Private pages use `no-store` and `no-referrer` response headers.
+
 ## Trip cup and hole-by-hole scoring
 
 - Create any number of teams with any number of players; no fixed two-team limit.
@@ -16,7 +29,7 @@
 
 ## Foundation
 
-- Password-protected organizer workspace, with session rotation and login rate limiting.
+- Personal accounts and a legacy organizer migration path, with session rotation and login rate limiting.
 - Create trips, add players with agreed playing handicaps, and schedule rounds within trip dates.
 - Enter and correct 18-hole gross totals; all changes in a scorecard save atomically.
 - Cumulative net leaderboard with ties and completion-aware placement. Incomplete players display pending and cannot take the lead.
@@ -35,7 +48,7 @@ bin/rails db:seed
 bin/rails server
 ```
 
-Open http://localhost:3000 and sign in with your configured password. `.env.example` documents configuration; it is not automatically loaded. No real player data is included.
+Open http://localhost:3000 and create a personal account. For legacy access, expand Existing organizer access and use your configured password. `.env.example` documents configuration; it is not automatically loaded. No real player data is included.
 
 Alternatively, with Docker installed:
 
@@ -70,18 +83,20 @@ Rails MVC + PostgreSQL + Hotwire/importmap. Trip owns players and rounds; a scor
 1. Per-round tees and playing-handicap allowances.
 2. Best ball, scramble, and mixed-format trip totals.
 3. Round-robin pairing suggestions for competitions with several teams.
-4. Individual accounts, trip-scoped permissions, and invitation links.
+4. Player-to-account roster links and per-foursome scoring permissions.
 5. Leaderboard broadcasts and past-trip champions.
 
 ## Deployment boundary
 
-This initial release is a shared organizer workspace: anyone with the password can manage every trip on that instance. It is not yet a public multi-tenant service. Keep the password private and use HTTPS in production. Production needs `SECRET_KEY_BASE`, `DATABASE_URL`, and `ORGANIZER_PASSWORD`; use Rails' standard production server setup and run `db:prepare` during release. `render.yaml` defines a Render Rails service and a shared PostgreSQL database.
+The app supports account-owned private trips. A group invite link grants access to anyone who has the link until it expires or is revoked. Share it only with the intended group. Existing shared-organizer credentials can manage unclaimed legacy trips, but cannot access other accounts' private trips. Recoveries use saved codes; email delivery and email verification are not configured.
+
+Production uses `SECRET_KEY_BASE`, `DATABASE_URL`, and the existing `ORGANIZER_PASSWORD` for legacy access. Keep the Rails secret key stable across deploys because it signs sessions and invitation links. `render.yaml` defines the Rails service and shared PostgreSQL database.
 
 ## Deploy on Render
 
-Use the repository's `render.yaml` as a Render Blueprint, or open [Deploy to Render](https://render.com/deploy?repo=https://github.com/joestella99/Tin-Cup). Set a private `ORGANIZER_PASSWORD` in Render when prompted. The blueprint generates `SECRET_KEY_BASE` and wires the database URL without committing either secret.
+Use the repository's `render.yaml` as a Render Blueprint, or open [Deploy to Render](https://render.com/deploy?repo=https://github.com/joestella99/Tin-Cup). Set a private `ORGANIZER_PASSWORD` in Render when prompted for legacy access. New users sign up with their own credentials. The blueprint generates `SECRET_KEY_BASE` and wires the database URL without committing either secret.
 
-The build installs gems and precompiles production assets. Startup checks required environment variables, prepares the database, and starts Puma on Render's assigned port. Demo seeds are not loaded in production. Sign in with the organizer password and create your first trip.
+The build installs gems and precompiles production assets. Startup checks required environment variables, prepares the database, and starts Puma on Render's assigned port. Demo seeds are not loaded in production. Create a personal account, save the recovery code, and create your first private trip.
 
 The initial configuration uses **free** plans. Free web instances may sleep between visits, and **Render's free PostgreSQL database expires after 30 days**. Upgrade the database before relying on this instance for ongoing trip records. No paid resources are selected by this blueprint.
 

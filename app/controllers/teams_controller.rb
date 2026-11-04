@@ -1,6 +1,6 @@
 class TeamsController < ApplicationController
   def create
-    trip = Trip.find(params[:trip_id])
+    trip = find_trip!(manage: true)
     team = trip.teams.build(params.require(:team).permit(:name))
     if team.save
       redirect_to trip, notice: "#{team.name} is in the cup."

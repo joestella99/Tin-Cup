@@ -9,7 +9,7 @@
     <%= javascript_importmap_tags %>
   </head>
   <body>
-    <header class="site-header"><%= link_to "⚑ TIN CUP", root_path, class: "brand" %><span class="tagline">GOOD FRIENDS. QUESTIONABLE GOLF.</span><% if session[:organizer] %><%= button_to "Sign out", session_path, method: :delete, class: "text-button" %><% end %></header>
+    <header class="site-header"><%= link_to "⚑ TIN CUP", root_path, class: "brand" %><span class="tagline">GOOD FRIENDS. QUESTIONABLE GOLF.</span><% if signed_in? %><span class="account-name"><% if current_user %><%= link_to current_user.name, account_path %><% else %>Organizer<% end %></span><%= button_to "Sign out", session_path, method: :delete, class: "text-button" %><% end %></header>
     <main>
       <% flash.each do |type, message| %><div class="flash <%= type %>" role="status"><%= message %></div><% end %>
       <%= yield %>

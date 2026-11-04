@@ -3,7 +3,7 @@
 <p class="eyebrow">BEFORE THE FIRST TEE</p>
 <h2>Confirm your course card</h2>
 <p>Set each hole's par and stroke index from the actual course scorecard. These control where handicap strokes fall in matches.</p>
-<%= link_to "Set up the 18 holes ↗", edit_trip_round_course_card_path(@trip, @round), class: "button" %>
+<% if @can_manage %><%= link_to "Set up the 18 holes ↗", edit_trip_round_course_card_path(@trip, @round), class: "button" %><% else %><p class="muted">Your organizer needs to confirm this course before scoring begins.</p><% end %>
 </section>
 <% else %>
 <section class="panel">

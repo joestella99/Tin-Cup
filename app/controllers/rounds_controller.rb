@@ -1,6 +1,6 @@
 class RoundsController < ApplicationController
   def create
-    trip = Trip.find(params[:trip_id])
+    trip = find_trip!(manage: true)
     round = trip.rounds.build(params.require(:round).permit(:course, :plays_on, :scoring_mode))
     if round.save
       redirect_to trip, notice: "Round added to the itinerary."
@@ -10,9 +10,10 @@ class RoundsController < ApplicationController
   end
 
   def show
-    @trip = Trip.find(params[:trip_id])
+    @trip = find_trip!
     @round = @trip.rounds.find(params[:id])
     @players = @trip.players.order(:name)
+    @can_manage = organizer_for?(@trip)
     @scores = @round.scores.index_by(&:player_id)
     @results = RoundResults.for(@round)
     @hole = @round.holes.find_by(number: params[:hole].presence || 1) if @round.hole_by_hole?

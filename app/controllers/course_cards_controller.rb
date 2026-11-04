@@ -1,13 +1,14 @@
 class CourseCardsController < ApplicationController
   def edit
-    @trip = Trip.find(params[:trip_id])
+    @trip = find_trip!
     @round = @trip.rounds.find(params[:round_id])
+    @can_manage = organizer_for?(@trip)
     @holes = @round.holes.order(:number)
     redirect_to trip_round_path(@trip, @round), alert: "This round uses total scores." unless @round.hole_by_hole?
   end
 
   def update
-    @trip = Trip.find(params[:trip_id])
+    @trip = find_trip!(manage: true)
     @round = @trip.rounds.find(params[:round_id])
     raise ActiveRecord::RecordNotFound unless @round.hole_by_hole?
     submitted = params.require(:holes)

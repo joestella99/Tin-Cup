@@ -1,0 +1,26 @@
+<%= link_to "← Sign in", new_session_path, class: "back" %>
+<section class="hero compact">
+<p class="eyebrow">YOUR SEAT IN THE CART</p>
+<h1>Join the clubhouse.</h1>
+<p class="lede">Keep your trips together and give your group a home for the competition.</p>
+</section>
+<section class="panel narrow">
+<h2>Create your account</h2>
+<% if @user.errors.any? %>
+<p role="alert">
+<%= @user.errors.full_messages.to_sentence %>
+</p>
+<% end %>
+<%= form_with model: @user, url: registration_path, data: {turbo: false} do |f| %>
+<%= f.label :name, "Your name" %>
+<%= f.text_field :name, required: true, maxlength: 60, autocomplete: "name" %>
+<%= f.label :email_address, "Email" %>
+<%= f.email_field :email_address, required: true, autocomplete: "username" %>
+<%= f.label :password, "Password (at least 12 characters)" %>
+<%= f.password_field :password, required: true, minlength: 12, autocomplete: "new-password" %>
+<%= f.label :password_confirmation, "Confirm password" %>
+<%= f.password_field :password_confirmation, required: true, minlength: 12, autocomplete: "new-password" %>
+<p class="muted">You'll receive a recovery code to save after signup. Keep it somewhere safe; you'll need it if you forget your password.</p>
+<%= f.submit "Create account ↗", class: "button" %>
+<% end %>
+</section>

@@ -1,0 +1,43 @@
+<section class="panel" id="trip-access">
+<p class="eyebrow">BRING THE WHOLE GROUP</p>
+<h2>Trip access</h2>
+<% if trip.ownership %>
+<% if invitation %>
+<p>Share this link with the buddies you want on this trip. Anyone with it can create an account and join as a scorer until <%= invitation.expires_at.strftime("%b %-d, %Y") %>.</p>
+<div data-controller="clipboard" class="copy-field">
+<label for="invite-link">Invite link</label>
+<input id="invite-link" type="text" value="<%= join_url(invitation.join_token) %>" readonly data-clipboard-target="source" autocomplete="off" spellcheck="false">
+<button type="button" class="small-button" data-action="clipboard#copy" data-clipboard-target="button">Copy invite</button>
+<span role="status" data-clipboard-target="status">
+</span>
+</div>
+<%= button_to "Revoke this link", trip_invitation_path(trip, invitation), method: :delete, class: "small-button", form: {data: {turbo_confirm: "Stop new joins from this link? Existing members keep access."}} %>
+<% else %>
+<p>Give the group their own sign-ins. Invitees can see this trip and enter scores; trip setup stays with you.</p>
+<% end %>
+<%= button_to(invitation ? "Create a replacement link" : "Create invite link ↗", trip_invitations_path(trip), class: "button") %>
+<div class="member-list">
+<% trip.memberships.includes(:user).order(:id).each do |member| %>
+<div class="member-row">
+<span>
+<strong>
+<%= member.user.name %>
+</strong>
+<small>
+<%= member.owner? ? "Organizer" : "Scorer" %>
+</small>
+</span>
+<% unless member.owner? %>
+<%= button_to "Remove access", trip_membership_path(trip, member), method: :delete, class: "text-button", form: {data: {turbo_confirm: "Remove this person's trip access? Revoke the invite link too if they should not rejoin."}} %>
+<% end %>
+</div>
+<% end %>
+</div>
+<% elsif current_user %>
+<p>Move this existing trip to your account to enable private access and invitations.</p>
+<%= button_to "Claim this trip ↗", trip_claim_path(trip), class: "button" %>
+<% else %>
+<p>Your existing organizer access still works. Create a personal account to claim this trip and invite the group.</p>
+<%= link_to "Create my account ↗", new_registration_path, class: "button" %>
+<% end %>
+</section>

@@ -1,7 +1,7 @@
 <section class="panel">
 <p class="eyebrow">THE TRAVELING PARTY</p>
 <h2>Team roster</h2>
-<p class="muted">Assign any number of players to each team. Once a player is paired, their team and handicap are locked to keep results consistent.</p>
+<p class="muted"><%= @can_manage ? "Assign players to any team. Teams and handicaps lock once a player is paired." : "Your organizer manages the teams and agreed playing handicaps." %></p>
 <div class="roster-grid">
 <% trip.players.includes(:team).order(:name).each do |player| %>
 <article class="roster-player">
@@ -12,11 +12,13 @@
 <small>Playing handicap <%= player.playing_handicap %>
 </small>
 </div>
+<% if @can_manage %>
 <%= form_with model: [trip, player] do |f| %>
 <%= f.label :team_id, "Team for #{player.name}", class: "visually-hidden" %>
 <%= f.collection_select :team_id, teams, :id, :name, include_blank: "Unassigned" %>
 <%= f.submit "Assign", class: "small-button" %>
 <% end %>
+<% else %><p class="muted"><%= player.team&.name || "Unassigned" %></p><% end %>
 </article>
 <% end %>
 </div>

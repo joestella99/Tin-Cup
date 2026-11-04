@@ -1,6 +1,6 @@
 class TripsController < ApplicationController
   def index
-    @trips = Trip.order(starts_on: :desc)
+    @trips = accessible_trips.order(starts_on: :desc)
   end
 
   def new
@@ -9,15 +9,19 @@ class TripsController < ApplicationController
 
   def create
     @trip = Trip.new(params.require(:trip).permit(:name, :destination, :starts_on, :ends_on))
-    if @trip.save
-      redirect_to @trip, notice: "Trip created. Time to assemble the group."
-    else
-      render :new, status: :unprocessable_entity
+    Trip.transaction do
+      @trip.save!
+      @trip.memberships.create!(user: current_user, role: :owner) if current_user
     end
+    redirect_to @trip, notice: "Trip created. Time to assemble the group."
+  rescue ActiveRecord::RecordInvalid
+    render :new, status: :unprocessable_entity
   end
 
   def show
-    @trip = Trip.find(params[:id])
+    @trip = find_trip!
+    @can_manage = organizer_for?(@trip)
+    @active_invitation = @trip.invitations.active.order(created_at: :desc).first if @can_manage
     @entries = Leaderboard.for(@trip)
     @cup_entries = CupStandings.for(@trip)
     @teams = @trip.teams.order(:name)

@@ -1,6 +1,6 @@
 class ScorecardsController < ApplicationController
   def update
-    trip = Trip.find(params[:trip_id])
+    trip = find_trip!
     round = trip.rounds.find(params[:round_id])
     return redirect_to trip_round_path(trip, round), alert: "Use the hole-by-hole scorecard for this round." if round.hole_by_hole?
     submitted = params.fetch(:scores, ActionController::Parameters.new).permit(*trip.players.pluck(:id).map(&:to_s)).to_h

@@ -1,6 +1,6 @@
 class HoleScoresController < ApplicationController
   def update
-    trip = Trip.find(params[:trip_id])
+    trip = find_trip!
     round = trip.rounds.find(params[:round_id])
     hole = round.holes.find(params[:hole_id])
     submitted = params.fetch(:strokes, ActionController::Parameters.new).permit(*trip.players.pluck(:id).map(&:to_s)).to_h

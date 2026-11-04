@@ -1,0 +1,22 @@
+<section class="hero compact">
+<p class="eyebrow">YOU'RE INVITED</p>
+<h1>
+<%= @invitation.trip.name %>
+</h1>
+<p class="lede">
+<%= @invitation.trip.destination %> · <%= @invitation.trip.starts_on.strftime("%b %-d, %Y") %>
+</p>
+</section>
+<section class="panel narrow">
+<h2>Get in on the competition.</h2>
+<p>Join the group to see the trip, follow standings, and enter scores. The organizer handles teams, courses, and pairings.</p>
+<% if current_user %>
+<p class="muted">Joining as <%= current_user.name %>.</p>
+<%= button_to "Join this trip ↗", join_path(params[:token]), class: "button" %>
+<% else %>
+<%= link_to "Create an account ↗", new_registration_path, class: "button" %>
+<p>Already a member? <%= link_to "Sign in", new_session_path %>
+</p>
+<% end %>
+<p class="muted">This invitation expires <%= @invitation.expires_at.strftime("%B %-d, %Y") %>.</p>
+</section>

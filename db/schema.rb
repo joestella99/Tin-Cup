@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_11_04_010000) do
+ActiveRecord::Schema[8.1].define(version: 2026_11_04_020000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -39,6 +39,23 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_04_010000) do
     t.check_constraint "number >= 1 AND number <= 18 AND par >= 3 AND par <= 6 AND stroke_index >= 1 AND stroke_index <= 18", name: "holes_valid_ranges"
   end
 
+  create_table "invitations", force: :cascade do |t|
+    t.bigint "trip_id", null: false
+    t.datetime "expires_at", null: false
+    t.datetime "revoked_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["trip_id"], name: "index_invitations_on_trip_id"
+  end
+
+  create_table "logins", force: :cascade do |t|
+    t.bigint "user_id", null: false
+    t.datetime "expires_at", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["user_id"], name: "index_logins_on_user_id"
+  end
+
   create_table "matches", force: :cascade do |t|
     t.bigint "round_id", null: false
     t.bigint "home_player_id", null: false
@@ -49,6 +66,19 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_04_010000) do
     t.index ["home_player_id"], name: "index_matches_on_home_player_id"
     t.index ["round_id"], name: "index_matches_on_round_id"
     t.check_constraint "home_player_id <> away_player_id", name: "matches_distinct_players"
+  end
+
+  create_table "memberships", force: :cascade do |t|
+    t.bigint "trip_id", null: false
+    t.bigint "user_id", null: false
+    t.string "role", default: "scorer", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["trip_id", "user_id"], name: "index_memberships_on_trip_id_and_user_id", unique: true
+    t.index ["trip_id"], name: "index_memberships_on_trip_id"
+    t.index ["trip_id"], name: "one_owner_per_trip", unique: true, where: "((role)::text = 'owner'::text)"
+    t.index ["user_id"], name: "index_memberships_on_user_id"
+    t.check_constraint "role::text = ANY (ARRAY['owner'::character varying, 'scorer'::character varying]::text[])", name: "memberships_valid_role"
   end
 
   create_table "players", force: :cascade do |t|
@@ -105,12 +135,26 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_04_010000) do
     t.datetime "updated_at", null: false
   end
 
+  create_table "users", force: :cascade do |t|
+    t.string "name", null: false
+    t.string "email_address", null: false
+    t.string "password_digest", null: false
+    t.string "recovery_code_digest", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["email_address"], name: "index_users_on_email_address", unique: true
+  end
+
   add_foreign_key "hole_scores", "holes"
   add_foreign_key "hole_scores", "players"
   add_foreign_key "holes", "rounds"
+  add_foreign_key "invitations", "trips"
+  add_foreign_key "logins", "users"
   add_foreign_key "matches", "players", column: "away_player_id"
   add_foreign_key "matches", "players", column: "home_player_id"
   add_foreign_key "matches", "rounds"
+  add_foreign_key "memberships", "trips"
+  add_foreign_key "memberships", "users"
   add_foreign_key "players", "teams"
   add_foreign_key "players", "trips"
   add_foreign_key "rounds", "trips"

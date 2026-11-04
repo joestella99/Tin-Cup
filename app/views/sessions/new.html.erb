@@ -1,2 +1,33 @@
-<section class="hero compact"><p class="eyebrow">THE GROUP'S HOME COURSE</p><h1>Your trip.<br>Your tournament.</h1><p class="lede">Plan the rounds, settle the scores, and take home the cup.</p></section>
-<section class="panel narrow"><h2>Organizer sign in</h2><p>Use the password configured for your group's workspace.</p><%= form_with url: session_path do |form| %><%= form.label :password, "Organizer password" %><%= form.password_field :password, required: true, autocomplete: "current-password" %><%= form.submit "Enter the clubhouse", class: "button" %><% end %></section>
+<section class="hero compact">
+  <p class="eyebrow">THE GROUP'S HOME COURSE</p>
+  <h1>Your trip.<br>Your tournament.</h1>
+  <p class="lede">One account. Your golf trips. The whole group on the same scorecard.</p>
+</section>
+<div class="auth-grid">
+  <section class="panel">
+    <h2>Welcome to the clubhouse</h2>
+    <%= form_with url: session_path do |f| %>
+      <%= f.label :email_address, "Email" %>
+      <%= f.email_field :email_address, required: true, autocomplete: "username" %>
+      <%= f.label :password %>
+      <%= f.password_field :password, required: true, autocomplete: "current-password" %>
+      <%= f.submit "Sign in ↗", class: "button" %>
+    <% end %>
+    <p class="auth-links"><%= link_to "Create an account", new_registration_path %> · <%= link_to "Recover your account", new_recovery_path %></p>
+  </section>
+  <aside class="panel auth-aside">
+    <p class="eyebrow">YOUR WEEKEND, TOGETHER</p>
+    <h2>Bring the buddies.</h2>
+    <p>Create a private trip, set up the competition, then share one invite link. Everyone gets their own sign-in and can enter scores for the group.</p>
+    <details class="setup-details">
+      <summary>Existing organizer access</summary>
+      <p class="muted">Already have a trip in Tin Cup? Your original organizer password still works. Sign in here, then create an account to claim your trips and invite the group.</p>
+      <%= form_with url: session_path do |f| %>
+        <%= hidden_field_tag :mode, "legacy" %>
+        <%= label_tag :legacy_password, "Original organizer password" %>
+        <%= password_field_tag :password, nil, id: "legacy_password", required: true, autocomplete: "current-password" %>
+        <%= f.submit "Open existing trips", class: "small-button" %>
+      <% end %>
+    </details>
+  </aside>
+</div>

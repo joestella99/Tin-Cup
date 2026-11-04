@@ -1,6 +1,6 @@
 class MatchesController < ApplicationController
   def destroy
-    trip = Trip.find(params[:trip_id])
+    trip = find_trip!(manage: true)
     round = trip.rounds.find(params[:round_id])
     match = round.matches.find(params[:id])
     round.with_lock do
@@ -13,7 +13,7 @@ class MatchesController < ApplicationController
   end
 
   def create
-    trip = Trip.find(params[:trip_id])
+    trip = find_trip!(manage: true)
     round = trip.rounds.find(params[:round_id])
     match = round.matches.build(params.require(:match).permit(:home_player_id, :away_player_id))
     round.with_lock { match.save! }

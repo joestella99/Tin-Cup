@@ -28,6 +28,7 @@
 <p class="muted">Two teams or twenty. Add your teams, assign the group, then set singles pairings on each hole-by-hole round.</p>
 <% end %>
 <p class="muted">Points count only when a match is final. Teams on equal points are tied. For a balanced cup, schedule the same number of matches per team; pairings are set by the organizer.</p>
+<% if @can_manage %>
 <details class="setup-details">
 <summary>
 <%= teams.any? ? "Add another team" : "Add the first team" %>
@@ -40,4 +41,5 @@
 <%= f.submit "Add team", class: "button" %>
 <% end %>
 </details>
+<% end %>
 </section>

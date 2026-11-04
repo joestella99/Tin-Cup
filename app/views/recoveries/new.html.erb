@@ -1,0 +1,20 @@
+<%= link_to "← Sign in", new_session_path, class: "back" %>
+<section class="hero compact">
+<p class="eyebrow">BACK IN THE GAME</p>
+<h1>Recover your account.</h1>
+<p class="lede">Use the recovery code you saved when you created your account.</p>
+</section>
+<section class="panel narrow">
+<h2>Set a new password</h2>
+<%= form_with url: recovery_path, data: {turbo: false} do |f| %>
+<%= f.label :email_address, "Email" %>
+<%= f.email_field :email_address, required: true, autocomplete: "username" %>
+<%= f.label :recovery_code %>
+<%= f.text_field :recovery_code, required: true, autocomplete: "off", spellcheck: false %>
+<%= f.label :password, "New password (at least 12 characters)" %>
+<%= f.password_field :password, required: true, minlength: 12, autocomplete: "new-password" %>
+<%= f.label :password_confirmation, "Confirm new password" %>
+<%= f.password_field :password_confirmation, required: true, minlength: 12, autocomplete: "new-password" %>
+<%= f.submit "Recover account", class: "button" %>
+<% end %>
+</section>

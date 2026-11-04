@@ -29,13 +29,13 @@
 </strong>
 <small>Through <%= result.through %> holes<%= " · 1 cup point" if result.status == :final && result.leader %>
 </small>
-<% unless @round.hole_scores.where(player_id: [match.home_player_id, match.away_player_id]).exists? %>
+<% if @can_manage && !@round.hole_scores.where(player_id: [match.home_player_id, match.away_player_id]).exists? %>
 <%= button_to "Remove pairing", trip_round_match_path(@trip, @round, match), method: :delete, class: "text-button remove-pairing", form: {data: {turbo_confirm: "Remove this unplayed pairing?"}} %>
 <% end %>
 </article>
 <% end %>
 </div>
-<% if @round.course_confirmed? && @available_players.size >= 2 %>
+<% if @can_manage && @round.course_confirmed? && @available_players.size >= 2 %>
 <details class="setup-details">
 <summary>Pair a singles match</summary>
 <%= form_with model: [@trip, @round, Match.new] do |f| %>

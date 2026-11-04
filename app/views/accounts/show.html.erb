@@ -1,0 +1,6 @@
+<section class="hero compact"><p class="eyebrow">YOUR CLUBHOUSE ACCOUNT</p><h1><%= current_user.name %></h1><p class="lede"><%= current_user.email_address %></p></section>
+<section class="panel narrow"><h2>Replace your recovery code</h2><p>If you lost your saved code, create a replacement here. Your old recovery code will stop working.</p>
+<%= form_with url: recovery_code_path, data: {turbo: false} do |f| %>
+<%= f.label :password, "Current password" %><%= f.password_field :password, required: true, autocomplete: "current-password" %>
+<%= f.submit "Generate a new recovery code", class: "button" %>
+<% end %></section>

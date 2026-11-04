@@ -1,0 +1,19 @@
+<section class="hero compact">
+<p class="eyebrow">WELCOME, <%= @user.name %>
+</p>
+<h1>You're in.</h1>
+<p class="lede">One quick thing before the first tee.</p>
+</section>
+<section class="panel narrow">
+<h2>Save your recovery code</h2>
+<p>This code lets you reset your password. It's shown only now. Store it in your password manager and keep it private.</p>
+<div data-controller="clipboard" class="copy-field">
+<label for="recovery-code">Your recovery code</label>
+<input id="recovery-code" type="text" value="<%= @recovery_code %>" readonly data-clipboard-target="source" autocomplete="off" spellcheck="false">
+<button type="button" class="small-button" data-action="clipboard#copy" data-clipboard-target="button">Copy code</button>
+<span role="status" data-clipboard-target="status">
+</span>
+</div>
+<p class="muted">Email recovery isn't configured. This code is your way back in if you lose your password. Using it replaces it with a new code and signs out your other sessions.</p>
+<%= link_to(session[:pending_invite].present? ? "Continue to the invitation ↗" : "Go to my trips ↗", session[:pending_invite].present? ? join_path(session[:pending_invite]) : trips_path, class: "button") %>
+</section>
