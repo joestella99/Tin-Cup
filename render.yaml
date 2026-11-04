@@ -30,6 +30,6 @@ databases:
   - name: tin-cup-db
     plan: free
     region: virginia
-    databaseName: tin_cup
-    user: tin_cup
+    databaseName: tin_cup_db
+    user: tin_cup_db_user
     ipAllowList: []
