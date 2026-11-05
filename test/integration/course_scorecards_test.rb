@@ -56,3 +56,21 @@ class CourseScorecardsTest < ActionDispatch::IntegrationTest
     OpenGolfApi.define_singleton_method(:full_course, original)
   end
 end
+
+
+class SelectedCourseDefaultModeTest < ActionDispatch::IntegrationTest
+  setup do
+    @previous_password = ENV["ORGANIZER_PASSWORD"]
+    ENV["ORGANIZER_PASSWORD"] = "scorecard-test"
+    post session_path, params: { password: ENV["ORGANIZER_PASSWORD"] }
+  end
+  teardown { ENV["ORGANIZER_PASSWORD"] = @previous_password }
+
+  test "selected saved course defaults to hole scoring rather than totals" do
+    trip = build_trip
+    course = GolfCourse.create!(external_id: "00000000-0000-0000-0000-000000000009", name: "Test Course")
+    get trip_path(trip, selected_course_id: course.id)
+    assert_response :success
+    assert_select "select[name='round[scoring_mode]'] option[value='hole_by_hole'][selected]"
+  end
+end

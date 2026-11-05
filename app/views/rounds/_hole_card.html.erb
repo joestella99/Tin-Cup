@@ -33,7 +33,7 @@
 <div class="hole-heading">
 <h3>Hole <%= @hole.number %>
 </h3>
-<span>Par <%= @hole.par %> · Stroke index <%= @hole.stroke_index %>
+<span>Par <%= @hole.par %> · <%= "#{@hole.yardage} yards · " if @hole.yardage %>Stroke index <%= @hole.stroke_index %>
 </span>
 </div>
 <p class="muted">Enter gross strokes. Blank clears a saved score. Partial rounds stay pending in the individual trip standings. Match results use consecutive completed holes from the first tee.</p>

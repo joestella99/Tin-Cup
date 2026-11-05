@@ -3,14 +3,15 @@ import { Controller } from "@hotwired/stimulus"
 // Reacts to selecting a saved course without another full-page navigation.
 // A tee selection is optional; the scorecard's par/stroke index is unchanged.
 export default class extends Controller {
-  static targets = ["course", "tee"]
+  static targets = ["course", "tee", "scoring"]
   static values = { map: Object, selected: String }
 
   connect() {
     this.update()
   }
 
-  update() {
+  update(event) {
+    if (event && this.courseTarget.value && this.hasScoringTarget) this.scoringTarget.value = "hole_by_hole"
     const options = this.mapValue[this.courseTarget.value] || []
     const old = this.teeTarget.value || this.selectedValue
     this.teeTarget.replaceChildren()
