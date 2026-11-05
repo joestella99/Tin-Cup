@@ -57,3 +57,19 @@ class GolfCourseTeeTest < ActiveSupport::TestCase
     assert_equal 381, round.holes.find_by!(number: 1).yardage
   end
 end
+
+
+class CourseRefreshSafetyTest < ActiveSupport::TestCase
+  test "refresh preserves known pars and stroke indexes if API omits them" do
+    id = "00000000-0000-0000-0000-000000000008"
+    original = { "id" => id, "course_name" => "Complete", "scorecard" =>
+      (1..18).map { |n| { "hole_number" => n, "par" => 4, "handicap_index" => n } } }
+    course = GolfCourse.import!(original)
+    partial = original.merge("scorecard" => (1..18).map do |n|
+      { "hole_number" => n, "par" => nil, "handicap_index" => nil, "yardages" => { "Blue" => 350 + n } }
+    end)
+    GolfCourse.import!(partial)
+    assert course.reload.complete_scorecard?
+    assert_equal 351, course.yardage_for(course.scorecard_entries.first, "Blue")
+  end
+end

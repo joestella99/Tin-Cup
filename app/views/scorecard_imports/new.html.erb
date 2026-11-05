@@ -10,7 +10,7 @@
     <h2><%= @round.course %></h2>
     <p class="muted"><%= @round.plays_on.strftime("%B %-d, %Y") %> · <%= @round.tee_name.present? ? "#{@round.tee_name} tees" : "18 holes" %></p>
     <% if @error.present? %><p class="flash alert" role="alert"><%= @error %></p><% end %>
-    <%= form_with url: trip_round_scorecard_import_path(@trip, @round), method: :post do |f| %>
+    <%= form_with url: trip_round_scorecard_import_path(@trip, @round), method: :post, multipart: true do |f| %>
       <% if @preview %>
         <%= hidden_field_tag :player_id, @selected_player.id %>
         <%= hidden_field_tag :import_values, @import_values %>

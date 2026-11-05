@@ -96,7 +96,19 @@ class GolfCourse < ApplicationRecord
     record = find_or_initialize_by(external_id: raw.fetch("id").to_s)
     # Don't regress an existing full card if an upstream refresh is incomplete.
     if record.persisted?
-      attrs[:scorecard] = record.scorecard if attrs[:scorecard].size < record.available_holes
+      previous = Array(record.scorecard).index_by { |hole| hole["number"] }
+      updated = attrs[:scorecard].index_by { |hole| hole["number"] }
+      attrs[:scorecard] = (1..18).filter_map do |number|
+        prior = previous[number]
+        newer = updated[number]
+        next prior unless newer
+        if prior
+          newer["par"] ||= prior["par"]
+          newer["stroke_index"] ||= prior["stroke_index"]
+          newer["yardages"] = (prior["yardages"].is_a?(Hash) ? prior["yardages"] : {}).merge(newer["yardages"])
+        end
+        newer
+      end
       attrs[:tee_options] = record.tee_options if attrs[:tee_options].empty?
     end
     record.update!(attrs)

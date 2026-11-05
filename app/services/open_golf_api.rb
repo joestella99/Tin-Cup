@@ -67,7 +67,7 @@ class OpenGolfApi
       next unless hole.is_a?(Hash)
       number = Integer(hole["hole_number"] || hole["number"] || hole["hole"], exception: false)
       next unless number && (1..18).cover?(number)
-      by_number[number] = by_number.fetch(number, {}).merge(hole)
+      by_number[number] = by_number.fetch(number, {}).merge(hole.compact)
       by_number[number]["hole_number"] = number
     end
     by_number.sort.map(&:last)
