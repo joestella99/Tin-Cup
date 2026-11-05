@@ -1,6 +1,7 @@
 <section class="panel">
 <p class="eyebrow">THE HEAD-TO-HEADS</p>
 <h2>Singles matches</h2>
+<% if @can_manage && @round.course_confirmed? %><p><%= link_to "⚑ Generate a full singles slate ↗", trip_round_pairing_suggestions_path(@trip, @round), class: "small-button" %></p><% end %>
 <p class="muted">Pair players from different teams. Each player can play one singles match per round. The higher-handicap player receives the difference in allowances, allocated by stroke index.</p>
 <div class="match-grid">
 <% @matches.each do |match| %>

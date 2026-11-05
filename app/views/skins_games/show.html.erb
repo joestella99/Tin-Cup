@@ -1,0 +1,44 @@
+<%= link_to "← Back to the scorecard", trip_round_path(@trip, @round), class: "back" %>
+<section class="skins-hero">
+  <p class="eyebrow">TIN CUP / THE SIDE GAME</p>
+  <h1>Skins.<br><em>Every hole matters.</em></h1>
+  <p><%= @round.course %> · <%= @round.plays_on.strftime("%B %-d, %Y") %></p>
+  <div class="skins-hero-actions"><span>GROSS SKINS · AUTOMATIC CARRYOVERS</span><%= link_to "Live clubhouse ↗", trip_clubhouse_path(@trip, round_id: @round.id), class: "small-button" %></div>
+</section>
+<div class="skins-stats">
+  <article><span>Skins claimed</span><strong><%= @game.leaders.sum(&:skins) %></strong></article>
+  <article><span>Carryover pot</span><strong><%= @game.unclaimed %></strong></article>
+  <article><span>Players</span><strong><%= @game.players.size %></strong></article>
+</div>
+<div class="skins-layout">
+  <section class="panel">
+    <p class="eyebrow">HOLE-BY-HOLE DRAMA</p><h2>The skins board</h2>
+    <p class="muted">Lowest unique gross score wins the hole and any carried skins. Ties roll over. A hole remains pending until everyone has entered a score. No money is tracked or collected.</p>
+    <div class="skins-hole-list">
+      <% @game.holes.each do |hole| %>
+        <article class="skins-hole <%= hole.status %>">
+          <div class="skins-hole-number"><small>HOLE</small><strong><%= "%02d" % hole.number %></strong><small>PAR <%= hole.par %></small></div>
+          <div class="skins-hole-detail">
+            <% if hole.status == :won %>
+              <strong><%= hole.winner.name %></strong><span>Wins with <%= hole.low_score %> strokes</span>
+            <% elsif hole.status == :carry %>
+              <strong>Carryover</strong><span><%= hole.tied_players.map(&:name).join(", ") %> tied at <%= hole.low_score %></span>
+            <% else %>
+              <strong>Awaiting scores</strong><span>All golfers must finish this hole</span>
+            <% end %>
+          </div>
+          <div class="skins-hole-pot"><strong><%= hole.status == :pending ? "—" : hole.pot %></strong><small><%= hole.status == :won ? "SKINS WON" : (hole.status == :carry ? "IN POT" : "PENDING") %></small></div>
+        </article>
+      <% end %>
+    </div>
+  </section>
+  <aside class="panel">
+    <p class="eyebrow">THE MONEY LIST (NO MONEY REQUIRED)</p><h2>Skins leaders</h2>
+    <div class="skins-leaders">
+      <% @game.leaders.each_with_index do |entry, index| %>
+        <div class="skins-leader"><span><%= "%02d" % (index + 1) %></span><div><strong><%= entry.player.name %></strong><small><%= entry.holes_won %> winning <%= "hole".pluralize(entry.holes_won) %></small></div><strong><%= entry.skins %></strong></div>
+      <% end %>
+    </div>
+    <p class="live-footnote">This side game is calculated from the existing scorecard. It does not change cup points or individual stroke-play standings. Unclaimed skins remain unawarded at the end of the round.</p>
+  </aside>
+</div>

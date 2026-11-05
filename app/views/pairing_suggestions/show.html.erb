@@ -1,0 +1,18 @@
+<%= link_to "← Back to the round", trip_round_path(@trip, @round), class: "back" %>
+<section class="hero compact"><p class="eyebrow">TIN CUP / TOURNAMENT DIRECTOR</p><h1>Build the rivalries.</h1><p class="lede">One click. An entire singles slate. No repeat matchups when avoidable.</p></section>
+<section class="panel">
+  <p class="eyebrow"><%= @round.course %> · <%= @round.plays_on.strftime("%b %-d") %></p>
+  <h2>Suggested pairings</h2>
+  <p class="muted">We prioritize opponents who haven't met before and spread matches across teams. Existing pairings are preserved. Review these before committing; every player can appear only once per round.</p>
+  <% if @suggestions.pairs.any? %>
+    <div class="pairing-preview">
+      <% @suggestions.pairs.each_with_index do |pair, index| %>
+        <article><span>MATCH <%= "%02d" % (index + 1) %></span><div><strong><%= pair.home.name %></strong><small><%= pair.home.team.name %></small></div><b>VS</b><div><strong><%= pair.away.name %></strong><small><%= pair.away.team.name %></small></div><span><%= pair.prior_meetings.zero? ? "FIRST MEETING" : "#{pair.prior_meetings} PREVIOUS" %></span></article>
+      <% end %>
+    </div>
+    <%= button_to "Confirm #{@suggestions.pairs.size} pairings ↗", trip_round_pairing_suggestions_path(@trip, @round), method: :post, class: "button", form: { data: { turbo_confirm: "Create these singles matches? Existing matches stay in place." } } %>
+  <% else %>
+    <p class="empty">No eligible cross-team pairs remain. Add or assign players, or remove an unplayed pairing to try again.</p>
+  <% end %>
+  <% if @suggestions.unpaired.any? %><p class="muted">Not paired this round: <%= @suggestions.unpaired.map(&:name).join(", ") %>. Players without another available team opponent remain unpaired.</p><% end %>
+</section>

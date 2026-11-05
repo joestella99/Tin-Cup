@@ -19,6 +19,8 @@ Rails.application.routes.draw do
       resource :scorecard, only: [ :update ]
       resource :course_card, only: [ :edit, :update ]
       resources :matches, only: [ :create, :destroy ]
+      resource :skins_game, only: [ :show ]
+      resource :pairing_suggestions, only: [ :show, :create ]
       resources :holes, only: [] do
         resource :hole_scores, only: [ :update ]
       end

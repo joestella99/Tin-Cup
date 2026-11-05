@@ -100,3 +100,19 @@ select{width:100%;padding:12px;border:1px solid #bdc8ba;border-radius:3px;backgr
 .score-save-actions{display:flex;flex-wrap:wrap;gap:12px;justify-content:flex-end}
 .button-gold{background:#dcb76d;color:#173a30}.button-gold:hover{background:#e8c985}
 @media(max-width:600px){.scoring-grid{grid-template-columns:1fr}.scoring-card{padding:17px}.score-stepper{min-height:52px}.score-step-button{width:48px}.score-save-actions .button{flex:1;min-width:150px}.score-save-actions{position:sticky;bottom:0;background:var(--paper);padding:11px 0;z-index:2}}
+
+/* Tournament director: skins + automatic singles */
+.round-extras{display:flex;flex-wrap:wrap;gap:10px;margin:10px 0 22px}
+.skins-hero{background:#193b31;color:#f7f1df;padding:50px 45px;margin:24px 0 18px;border-top:5px solid #d8ae5c}
+.skins-hero .eyebrow{color:#d8ae5c}.skins-hero h1{font-family:Georgia,serif;font-size:clamp(45px,6vw,78px);line-height:1.05;margin:18px 0}.skins-hero h1 em{color:#e1c687}.skins-hero>p:not(.eyebrow){color:#c5d4c5}
+.skins-hero-actions{display:flex;align-items:center;justify-content:space-between;gap:15px;margin-top:30px;flex-wrap:wrap}.skins-hero-actions span{font-size:10px;letter-spacing:1.5px;color:#c9d9c8}.skins-hero-actions .small-button{color:#193b31;background:#e4e6d7}
+.skins-stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-bottom:20px}.skins-stats article{background:#e3eadb;padding:22px;display:grid;gap:10px}.skins-stats span{font-size:11px;color:var(--muted)}.skins-stats strong{font:34px Georgia,serif}
+.skins-layout{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(240px,1fr);gap:20px}.skins-hole-list{border-top:1px solid var(--line);margin-top:25px}
+.skins-hole{display:flex;gap:17px;align-items:center;padding:15px 6px;border-bottom:1px solid var(--line)}.skins-hole-number{width:48px;display:grid;gap:4px;flex-shrink:0;text-align:center}.skins-hole-number small{font-size:9px;letter-spacing:1px;color:var(--muted)}.skins-hole-number strong{font:28px Georgia,serif}
+.skins-hole-detail{flex:1;min-width:0}.skins-hole-detail strong{display:block;font-size:14px}.skins-hole-detail span{display:block;color:var(--muted);font-size:11px;margin-top:5px;overflow-wrap:anywhere}
+.skins-hole-pot{text-align:right;min-width:64px}.skins-hole-pot strong{font:27px Georgia,serif;display:block}.skins-hole-pot small{font-size:9px;letter-spacing:1px;color:var(--muted)}
+.skins-hole.won{background:#eef3e9}.skins-hole.carry .skins-hole-pot strong{color:#9b6a2d}
+.skins-leader{display:flex;align-items:center;gap:13px;padding:16px 0;border-bottom:1px solid var(--line)}.skins-leader>span{color:#819879;font:20px Georgia,serif}.skins-leader>div{flex:1;min-width:0}.skins-leader>div strong{display:block}.skins-leader>div small{display:block;color:var(--muted);margin-top:5px}.skins-leader>strong{font:28px Georgia,serif}
+.pairing-preview{margin:22px 0}.pairing-preview article{display:flex;align-items:center;gap:15px;padding:18px 12px;border-bottom:1px solid var(--line);flex-wrap:wrap}.pairing-preview article>span{font-size:10px;letter-spacing:1px;color:var(--muted)}.pairing-preview article>div{flex:1;min-width:120px}.pairing-preview article>div strong{display:block}.pairing-preview article>div small{display:block;color:var(--muted);margin-top:5px}.pairing-preview article>b{font:18px Georgia,serif;color:#9ba99a}
+.tournament-upgrade{background:#e5ddc5;border-left:5px solid #bd9452;padding:28px 32px;margin:20px 0}.tournament-upgrade h2{font-size:30px;margin:10px 0}.tournament-upgrade>p:not(.eyebrow){max-width:650px;color:#57645b;line-height:1.6}.tournament-upgrade>div{display:flex;gap:9px;flex-wrap:wrap;margin-top:18px}
+@media(max-width:750px){.skins-layout{grid-template-columns:1fr}.skins-hero{padding:35px 24px}.skins-stats article{padding:15px}.skins-stats strong{font-size:27px}.pairing-preview article>span:last-child{width:100%}}

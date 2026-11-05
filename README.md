@@ -27,6 +27,12 @@
 - Course details lock after scoring or pairing starts. Teams and handicaps lock for paired players. Unplayed pairings can be removed before either player has entered scores.
 - Individual trip standings count only completed 18-hole rounds. Existing total-score rounds remain supported.
 
+## Tournament director: automatic pairings and skins
+
+- Every confirmed hole-by-hole round supports a gross skins side game, with a hole-by-hole board, player rankings, and automatic carryovers for ties. A skin is only decided once every golfer in the trip has entered that hole's score. Pending holes do not award skins, and unclaimed carryovers are not assigned at round end. No money is handled.
+- Organizers can preview and commit automatically suggested singles pairings. The generator avoids previous opponents where possible and distributes pairings across teams, while keeping existing matches. Unmatched players are explicitly listed. The commit runs inside a database transaction and refuses to create pairings after round scoring has begun.
+- Skins and singles share the same source scorecards, so correcting a hole recalculates results automatically. Both respect existing trip membership and organizer permissions.
+
 ## Live clubhouse
 
 - Every member of a trip can open the live clubhouse from the trip or round screen.
