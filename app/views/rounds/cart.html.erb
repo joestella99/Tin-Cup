@@ -1,5 +1,5 @@
 <% content_for :body_class, "cart-mode-page" %>
-<div class="cart-shell"<% if @scoring_player %> data-controller="cart-offline" data-action="online@window->cart-offline#retry storage@window->cart-offline#storageChanged" data-cart-offline-state-value="<%= {
+<div class="cart-shell"<% if @scoring_player %> data-controller="cart-offline" data-action="click->cart-offline#jump online@window->cart-offline#retry storage@window->cart-offline#storageChanged" data-cart-offline-state-value="<%= {
   scope: current_user ? "user-#{current_user.id}" : "legacy-organizer",
   tripId: @trip.id, roundId: @round.id, playerId: @scoring_player.id,
   handicap: @scoring_player.playing_handicap,
@@ -106,6 +106,14 @@
       <div><small>HOLES IN</small><strong><span data-cart-offline-target="completed"><%= @card.completed_holes %></span><em>/18</em></strong></div>
     </div>
 
+    <section class="cart-offline-completed" data-cart-offline-target="completion" hidden>
+      <span class="cart-finish-mark" aria-hidden="true">★</span>
+      <p class="cart-kicker">18 HOLES RECORDED</p>
+      <h2>The round is in the books.</h2>
+      <p data-cart-offline-target="completionText">Your scores are ready.</p>
+      <button class="cart-custom-save" type="button" data-action="cart-offline#retry">Sync scorecard now ↗</button>
+      <%= link_to "See the leaderboard →", trip_clubhouse_path(@trip, round_id: @round.id), class: "cart-subtle-link" %>
+    </section>
     <% if @card.completed? && params[:hole].blank? %>
       <section class="cart-finished" data-cart-offline-target="finished">
         <span class="cart-finish-mark" aria-hidden="true">★</span>
@@ -117,7 +125,7 @@
       </section>
     <% else %>
       <section class="cart-score-entry" data-cart-offline-target="scoreEntry">
-        <div class="cart-score-heading"><div><p class="cart-kicker">JUST FINISHED THE HOLE?</p><h2 data-cart-offline-target="headline"><%= @previous_score ? "Change your score." : "How'd you do?" %></h2></div><% if @previous_score %><span class="cart-saved-chip" data-cart-offline-target="savedChip">✓ SAVED <%= @previous_score.strokes %></span><% end %></div>
+        <div class="cart-score-heading"><div><p class="cart-kicker">JUST FINISHED THE HOLE?</p><h2 data-cart-offline-target="headline"><%= @previous_score ? "Change your score." : "How'd you do?" %></h2></div><span class="cart-saved-chip" data-cart-offline-target="savedChip" <%= "hidden" unless @previous_score %>>✓ SAVED <%= @previous_score&.strokes %></span></div>
         <p class="cart-instruction">One tap records your score, even when reception drops. Pending scores sync when you're back online.</p>
         <%= form_with url: trip_round_hole_hole_scores_path(@trip, @round, @hole), method: :patch,
           class: "cart-score-form", data: { cart_offline_target: "form", action: "submit->cart-offline#score" } do %>
@@ -140,12 +148,10 @@
               <button type="submit" name="save_custom" value="1" class="cart-custom-save">Save custom score →</button>
             </div>
           </details>
-          <% if @previous_score %>
-            <button type="submit" name="strokes[<%= @scoring_player.id %>]" value="" class="cart-clear-score" data-cart-offline-target="clearButton" data-turbo-confirm="Clear your score for hole <%= @hole.number %>?">↶ Clear saved score</button>
-          <% end %>
+          <button type="submit" name="strokes[<%= @scoring_player.id %>]" value="" class="cart-clear-score" data-cart-offline-target="clearButton" data-turbo-confirm="Clear your saved score?">↶ Clear saved score</button>
           <p class="cart-save-status" data-cart-offline-target="status" role="status" aria-live="polite"></p>
         <% end %>
-        <div class="cart-hole-paging">
+        <div class="cart-hole-paging" data-cart-offline-target="paging">
           <% if @hole.number > 1 %><%= link_to "← Hole #{@hole.number - 1}", cart_trip_round_path(@trip, @round, player_id: @scoring_player.id, hole: @hole.number - 1), data: { cart_hole: @hole.number - 1 } %><% end %>
           <% if @hole.number < 18 %><%= link_to "Skip to hole #{@hole.number + 1} →", cart_trip_round_path(@trip, @round, player_id: @scoring_player.id, hole: @hole.number + 1), data: { cart_hole: @hole.number + 1 } %><% end %>
         </div>
