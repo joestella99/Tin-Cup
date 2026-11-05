@@ -138,3 +138,96 @@ class CartModeTest < ActionDispatch::IntegrationTest
     assert_select ".hq-next-card a[href='#{cart_trip_round_path(@trip, @round)}']"
   end
 end
+
+
+class CartSyncFlowTest < ActionDispatch::IntegrationTest
+  setup do
+    @prior = ENV["ORGANIZER_PASSWORD"]
+    ENV["ORGANIZER_PASSWORD"] = "offline-score-tests"
+    post session_path, params: { password: ENV["ORGANIZER_PASSWORD"] }
+    @trip = build_trip(name: "Offline Cup")
+    @joe = @trip.players.create!(name: "Joe", playing_handicap: 6)
+    @matt = @trip.players.create!(name: "Matt", playing_handicap: 12)
+    @round = @trip.rounds.create!(course: "The Links", plays_on: @trip.starts_on, scoring_mode: :hole_by_hole)
+    @round.update!(course_confirmed: true)
+    @hole = @round.holes.find_by!(number: 1)
+  end
+
+  teardown { ENV["ORGANIZER_PASSWORD"] = @prior }
+
+  def sync_score(strokes, expected:)
+    patch trip_round_hole_hole_scores_path(@trip, @round, @hole),
+      params: { cart_mode: "1", cart_sync: "1", player_id: @joe.id,
+        cart_expected_strokes: expected,
+        strokes: { @joe.id.to_s => strokes } },
+      headers: { "ACCEPT" => "application/json" }
+  end
+
+  test "cart mode exposes 18-hole offline state tied to the logged-in member and round" do
+    get cart_trip_round_path(@trip, @round, player_id: @joe.id)
+    assert_response :success
+    assert_select ".cart-shell[data-controller='cart-offline'][data-cart-offline-state-value]"
+    assert_select ".cart-sync-indicator[hidden]"
+    assert_select ".cart-conflict[hidden]"
+    assert_select ".cart-score-form[data-action*='cart-offline#score']"
+    assert_select ".cart-hole-link[data-cart-hole]", count: 18
+  end
+
+  test "sync returns acknowledgement and is safe to retry after a lost response" do
+    sync_score("3", expected: "blank")
+    assert_response :success
+    assert_equal 3, response.parsed_body["strokes"]
+    assert_equal 1, response.parsed_body["hole"]
+    assert_equal 3, @hole.hole_scores.find_by!(player: @joe).strokes
+    sync_score("3", expected: "blank")
+    assert_response :success
+    assert_equal 1, @hole.hole_scores.where(player: @joe).count
+    assert_not @hole.hole_scores.exists?(player: @matt)
+  end
+
+  test "an offline conflict returns 409 without overwriting a score" do
+    @hole.hole_scores.create!(player: @joe, strokes: 5)
+    sync_score("3", expected: "blank")
+    assert_response :conflict
+    assert_equal 5, response.parsed_body["server_strokes"]
+    assert_equal 5, @hole.hole_scores.find_by!(player: @joe).strokes
+
+    # Explicitly accepting the other-device score as a baseline allows the edit.
+    sync_score("3", expected: "5")
+    assert_response :success
+    assert_equal 3, @hole.hole_scores.find_by!(player: @joe).strokes
+  end
+
+  test "a conflict when the other device removed a score reports a null server value" do
+    sync_score("4", expected: "blank")
+    assert_response :success
+    sync_score("5", expected: "blank")
+    assert_response :conflict
+    assert_equal 4, response.parsed_body["server_strokes"]
+    sync_score("", expected: "4")
+    assert_response :success
+    assert_nil response.parsed_body["strokes"]
+    sync_score("5", expected: "4")
+    assert_response :conflict
+    assert_nil response.parsed_body["server_strokes"]
+    assert_not @hole.hole_scores.exists?(player: @joe)
+  end
+
+  test "synchronization never accepts another golfer's forged score" do
+    @hole.hole_scores.create!(player: @matt, strokes: 5)
+    patch trip_round_hole_hole_scores_path(@trip, @round, @hole),
+      params: { cart_mode: "1", cart_sync: "1", player_id: @joe.id,
+        cart_expected_strokes: "blank",
+        strokes: { @joe.id.to_s => "3", @matt.id.to_s => "1" } },
+      headers: { "ACCEPT" => "application/json" }
+    assert_response :success
+    assert_equal 3, @hole.hole_scores.find_by!(player: @joe).strokes
+    assert_equal 5, @hole.hole_scores.find_by!(player: @matt).strokes
+  end
+
+  test "malformed sync requests fail without changing any score" do
+    sync_score("4", expected: "something bad")
+    assert_response :bad_request
+    assert_not @hole.hole_scores.exists?(player: @joe)
+  end
+end

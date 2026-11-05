@@ -97,6 +97,8 @@ export default class extends Controller {
 
   storageChanged(event) {
     if (event.key !== this.storageKey || this.syncing || !this.canQueue) return
+    this.queue = {}
+    this.conflicts = {}
     this.loadQueue()
     this.updateView()
     this.updateIndicator()
@@ -381,8 +383,13 @@ export default class extends Controller {
     const number = this.conflictHole
     const entry = this.queue[number]
     if (!entry) return
+    const prior = entry.expected
     entry.expected = this.conflicts[number]
-    if (!this.persistQueue()) return
+    if (!this.persistQueue()) {
+      entry.expected = prior
+      this.updateIndicator()
+      return
+    }
     delete this.conflicts[number]
     this.syncIssue = ""
     this.updateIndicator()
@@ -392,10 +399,17 @@ export default class extends Controller {
   keepServer() {
     const number = this.conflictHole
     if (!this.queue[number]) return
-    this.serverScores[number] = this.conflicts[number]
+    const serverValue = this.conflicts[number]
+    const entry = this.queue[number]
     delete this.conflicts[number]
     delete this.queue[number]
-    if (!this.persistQueue()) return
+    if (!this.persistQueue()) {
+      this.queue[number] = entry
+      this.conflicts[number] = serverValue
+      this.updateIndicator()
+      return
+    }
+    this.serverScores[number] = serverValue
     this.updateView()
     this.updateIndicator()
     this.sync()
@@ -414,7 +428,7 @@ export default class extends Controller {
     this.updateIndicator()
     try {
       for (const number of Object.keys(this.queue).map(Number).sort((a, b) => a - b)) {
-        if (this.conflicts[number]) continue
+        if (Object.prototype.hasOwnProperty.call(this.conflicts, number)) continue
         const entry = this.queue[number]
         if (!entry) continue
         const hole = this.holeByNumber[number]
