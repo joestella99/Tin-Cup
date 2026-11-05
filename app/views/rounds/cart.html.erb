@@ -1,0 +1,146 @@
+<% content_for :body_class, "cart-mode-page" %>
+<div class="cart-shell">
+  <header class="cart-topbar">
+    <%= link_to trip_path(@trip), class: "cart-brand", aria: { label: "Return to #{@trip.name}" } do %>
+      <span class="cart-flag" aria-hidden="true">⚑</span> TIN CUP
+    <% end %>
+    <nav class="cart-top-actions" aria-label="Cart mode links">
+      <span class="cart-mode-badge">CART MODE</span>
+      <%= link_to "The Cup ↗", trip_clubhouse_path(@trip, round_id: @round.id), class: "cart-top-link" %>
+    </nav>
+  </header>
+
+  <% if @players.empty? %>
+    <section class="cart-empty"><p class="cart-kicker">THE FIRST TEE AWAITS</p><h1>The course is ready.<br>Bring the crew.</h1><p>Have your captain add the golfers to this trip before scoring.</p><%= link_to "Back to the trip →", trip_path(@trip), class: "cart-cta" %></section>
+  <% elsif !@scoring_player %>
+    <section class="cart-pick">
+      <p class="cart-kicker">THE FIRST TEE</p>
+      <h1>Whose card<br>are we keeping?</h1>
+      <p>Choose once. We'll remember your golfer in this browser so every hole takes a single tap.</p>
+      <nav class="cart-player-grid" aria-label="Choose your golfer">
+        <% @players.each do |player| %>
+          <%= link_to cart_trip_round_path(@trip, @round, player_id: player.id), class: "cart-player-card" do %>
+            <span class="cart-avatar"><%= player.name.first.upcase %></span>
+            <span class="cart-player-details"><strong><%= player.name %></strong><small><%= player.team&.name || "Individual" %> · HCP <%= player.playing_handicap %></small></span>
+            <span class="cart-arrow" aria-hidden="true">→</span>
+          <% end %>
+        <% end %>
+      </nav>
+      <p class="cart-picker-footnote">Keeping score for someone else? You can switch golfers at any time.</p>
+    </section>
+  <% else %>
+    <div class="cart-roundbar">
+      <div><p class="cart-kicker"><%= @trip.name %> · ROUND DAY</p><h1><%= @round.course %></h1></div>
+      <details class="cart-player-switch">
+        <summary aria-label="Change golfer"><span class="cart-avatar"><%= @scoring_player.name.first.upcase %></span><span><strong><%= @scoring_player.name %></strong><small>Change golfer</small></span><span aria-hidden="true">⌄</span></summary>
+        <nav class="cart-player-options" aria-label="Switch golfer">
+          <% @players.each do |player| %>
+            <%= link_to player.name, cart_trip_round_path(@trip, @round, player_id: player.id), class: (player.id == @scoring_player.id ? "current" : nil) %>
+          <% end %>
+        </nav>
+      </details>
+    </div>
+
+    <% if @cart_feedback %>
+      <% last_hole = @cart_feedback["hole"].to_i; last_score = @cart_feedback["strokes"]&.to_i; last_par = @cart_feedback["par"].to_i; was_cleared = @cart_feedback["cleared"] == true %>
+      <div class="cart-toast <%= !was_cleared && last_score && last_score < last_par ? 'cart-toast-highlight' : '' %>" role="status" aria-live="polite">
+        <span class="cart-toast-icon" aria-hidden="true"><%= was_cleared ? "↶" : "✓" %></span>
+        <span class="cart-toast-copy"><strong><%= was_cleared ? "Score cleared." : "#{@card.label_for(last_score, last_par).capitalize}! Saved." %></strong><small><%= was_cleared ? "Hole #{last_hole} is ready for a new score." : "Hole #{last_hole} · #{last_score} strokes · #{@card.completed_holes}/18 recorded" %></small></span>
+        <%= link_to "Edit ↗", cart_trip_round_path(@trip, @round, player_id: @scoring_player.id, hole: last_hole), class: "cart-toast-edit", aria: { label: "Edit hole #{last_hole}" } %>
+      </div>
+    <% end %>
+
+    <section class="cart-hole-hero" aria-label="Current hole">
+      <div class="cart-hero-overline"><span><%= @round.tee_name.presence ? "#{@round.tee_name.upcase} TEES" : "THE SCORECARD" %></span><span><%= @card.completed_holes %> / 18 SCORED</span></div>
+      <div class="cart-hole-main">
+        <div class="cart-hole-number"><small>HOLE</small><strong><%= "%02d" % @hole.number %></strong></div>
+        <div class="cart-hole-details">
+          <div><small>PAR</small><strong><%= @hole.par %></strong></div>
+          <div><small><%= @hole.yardage ? "YARDS" : "STROKE INDEX" %></small><strong><%= @hole.yardage || @hole.stroke_index %></strong></div>
+          <% if @hole.yardage %><span>HCP INDEX <%= @hole.stroke_index %></span><% end %>
+        </div>
+      </div>
+      <div class="cart-progress-track" role="progressbar" aria-label="Holes scored" aria-valuemin="0" aria-valuemax="100" aria-valuenow="<%= @card.progress %>"><span style="width: <%= @card.progress %>%"></span></div>
+    </section>
+
+    <nav class="cart-hole-nav" aria-label="Jump to a hole">
+      <% @card.holes.each do |hole| %>
+        <%= link_to hole.number, cart_trip_round_path(@trip, @round, player_id: @scoring_player.id, hole: hole.number),
+          class: "cart-hole-link #{'active' if hole == @hole} #{'recorded' if @card.score_for(hole)}",
+          aria: { current: hole == @hole ? "page" : nil, label: "Hole #{hole.number}#{@card.score_for(hole) ? ', already scored' : ''}" } %>
+      <% end %>
+    </nav>
+
+    <div class="cart-stats" aria-label="Your live round">
+      <div><small>GROSS TO PAR</small><strong><%= @card.completed_holes.positive? ? @card.display_to_par(@card.to_par) : "—" %></strong></div>
+      <div><small>NET TO PAR</small><strong><%= @card.completed_holes.positive? ? @card.display_to_par(@card.net_to_par) : "—" %></strong></div>
+      <div><small>HOLES IN</small><strong><%= @card.completed_holes %><em>/18</em></strong></div>
+    </div>
+
+    <% if @card.completed? && params[:hole].blank? %>
+      <section class="cart-finished">
+        <span class="cart-finish-mark" aria-hidden="true">★</span>
+        <p class="cart-kicker">ALL 18 IN THE BOOKS</p>
+        <h2>That's a wrap.</h2>
+        <p><%= @scoring_player.name %> has a complete card: <strong><%= @card.gross %> gross · <%= @card.display_to_par(@card.net_to_par) %> net to par.</strong></p>
+        <%= link_to "See the leaderboard →", trip_clubhouse_path(@trip, round_id: @round.id), class: "cart-cta" %>
+        <%= link_to "Review my holes", cart_trip_round_path(@trip, @round, player_id: @scoring_player.id, hole: 1), class: "cart-subtle-link" %>
+      </section>
+    <% else %>
+      <section class="cart-score-entry">
+        <div class="cart-score-heading"><div><p class="cart-kicker">JUST FINISHED THE HOLE?</p><h2><%= @previous_score ? "Change your score." : "How'd you do?" %></h2></div><% if @previous_score %><span class="cart-saved-chip">✓ SAVED <%= @previous_score.strokes %></span><% end %></div>
+        <p class="cart-instruction">One tap saves your score and loads the next hole.</p>
+        <%= form_with url: trip_round_hole_hole_scores_path(@trip, @round, @hole), method: :patch,
+          class: "cart-score-form", data: { controller: "cart-score", action: "submit->cart-score#submit turbo:submit-end->cart-score#complete" } do %>
+          <%= hidden_field_tag :player_id, @scoring_player.id %>
+          <%= hidden_field_tag :cart_mode, "1" %>
+          <div class="cart-score-buttons">
+            <% @score_choices.each do |choice| %>
+              <button type="submit" name="strokes[<%= @scoring_player.id %>]" value="<%= choice.strokes %>"
+                class="cart-score-button <%= 'is-par' if choice.label == 'PAR' %> <%= 'is-saved' if @previous_score&.strokes == choice.strokes %>"
+                aria-label="Score <%= choice.strokes %> strokes, <%= choice.label.downcase %>, hole <%= @hole.number %>">
+                <strong><%= choice.strokes %></strong><span><%= choice.label %></span>
+              </button>
+            <% end %>
+          </div>
+          <details class="cart-other-score">
+            <summary>Different score? Enter it here <span aria-hidden="true">＋</span></summary>
+            <div class="cart-other-body">
+              <%= label_tag :custom_strokes, "Gross strokes (1–30)" %>
+              <%= number_field_tag :custom_strokes, nil, min: 1, max: 30, step: 1, inputmode: "numeric", placeholder: "Strokes" %>
+              <button type="submit" name="save_custom" value="1" class="cart-custom-save">Save custom score →</button>
+            </div>
+          </details>
+          <% if @previous_score %>
+            <button type="submit" name="strokes[<%= @scoring_player.id %>]" value="" class="cart-clear-score" data-turbo-confirm="Clear your score for hole <%= @hole.number %>?">↶ Clear saved score</button>
+          <% end %>
+          <p class="cart-save-status" data-cart-score-target="status" role="status" aria-live="polite"></p>
+        <% end %>
+        <div class="cart-hole-paging">
+          <% if @hole.number > 1 %><%= link_to "← Hole #{@hole.number - 1}", cart_trip_round_path(@trip, @round, player_id: @scoring_player.id, hole: @hole.number - 1) %><% end %>
+          <% if @hole.number < 18 %><%= link_to "Skip to hole #{@hole.number + 1} →", cart_trip_round_path(@trip, @round, player_id: @scoring_player.id, hole: @hole.number + 1) %><% end %>
+        </div>
+      </section>
+    <% end %>
+
+    <% if @match_result %>
+      <aside class="cart-rivalry">
+        <div><p class="cart-kicker">YOUR HEAD-TO-HEAD</p><h3><%= @match.home_player.name %> <span>vs</span> <%= @match.away_player.name %></h3></div>
+        <div class="cart-rivalry-result">
+          <% if @match_result.status == :scheduled %><strong>NOT STARTED</strong>
+          <% elsif @match_result.leader.nil? %><strong>ALL SQUARE</strong>
+          <% else %><strong><%= @match_result.margin %> UP <%= @match_result.status == :final ? "· FINAL" : "" %></strong><% end %>
+          <small><%= @match_result.leader&.name || (@match_result.status == :scheduled ? "First tee awaits" : "Tied") %><%= @match_result.through.positive? ? " · Thru #{@match_result.through}" : "" %></small>
+        </div>
+      </aside>
+    <% else %>
+      <aside class="cart-rivalry"><div><p class="cart-kicker">THE BIG PICTURE</p><h3>The Cup is live.</h3></div><%= link_to "Live leaderboard ↗", trip_clubhouse_path(@trip, round_id: @round.id), class: "cart-rivalry-link" %></aside>
+    <% end %>
+
+    <nav class="cart-bottom-links" aria-label="Other views">
+      <%= link_to "◉ Score", cart_trip_round_path(@trip, @round, player_id: @scoring_player.id), class: "active" %>
+      <%= link_to "♜ Leaderboard", trip_clubhouse_path(@trip, round_id: @round.id) %>
+      <%= link_to "☷ Full card", trip_round_path(@trip, @round, player_id: @scoring_player.id) %>
+    </nav>
+  <% end %>
+</div>
