@@ -17,7 +17,7 @@ class TripExperienceTest < ActionDispatch::IntegrationTest
     get trip_path(@trip)
     assert_response :success
     assert_select ".hq-tabs .active", text: "Home"
-    assert_select ".hq-next-card a", text: /scorecard/
+    assert_select ".hq-next-card a", text: /score/
     assert_select "#schedule-round", count: 0
     get trip_path(@trip, view: "manage")
     assert_response :success
