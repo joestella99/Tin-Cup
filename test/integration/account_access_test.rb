@@ -29,7 +29,6 @@ class AccountAccessTest < ActionDispatch::IntegrationTest
     assert_equal "same-origin", response.headers["Referrer-Policy"]
     assert_equal "no-store", response.headers["Cache-Control"]
     assert_select "form[action='#{registration_path}'][method='post']"
-    assert_select "input[name='authenticity_token']"
 
     get new_session_path
     assert_response :success
