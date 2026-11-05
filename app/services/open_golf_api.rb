@@ -1,13 +1,14 @@
 require "net/http"
 require "json"
 require "uri"
+require "digest"
 
 # Strictly server-side OpenGolfAPI client, with bounded timeouts and caching.
 # No user-controlled URLs or arbitrary remote endpoints are accepted.
 class OpenGolfApi
   class Unavailable < StandardError; end
   HOST = "api.opengolfapi.org"
-  ID_PATTERN = /\\A[0-9a-f-]{36}\\z/i
+  ID_PATTERN = /\A[0-9a-f-]{36}\z/i
 
   def self.search(term)
     q = term.to_s.strip[0, 80]
