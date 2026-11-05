@@ -121,3 +121,15 @@ The build installs gems and precompiles production assets. Startup checks requir
 The initial configuration uses **free** plans. Free web instances may sleep between visits, and **Render's free PostgreSQL database expires after 30 days**. Upgrade the database before relying on this instance for ongoing trip records. No paid resources are selected by this blueprint.
 
 The deployment configuration is committed; a live deployment still requires a connected Render account and successful provisioning. Verify `/up`, sign-in, trip creation, and persistence after a restart before sharing it with the group.
+
+
+## Bring your own scorecard
+
+Players can import a complete 18-hole gross scorecard via a paste of 18 strokes,
+a plain-text file, or a CSV with hole and strokes columns. A full preview is
+required before confirming, and replacing saved scores requires explicit
+approval. Other golfers' cards are not affected.
+
+This is not an official 18Birdies API connection; it doesn't access player
+accounts or scrape third-party websites. Authorized score-sync partners can
+eventually feed the same validated 18-hole importer.

@@ -23,6 +23,7 @@ Rails.application.routes.draw do
     resources :players, only: [ :create, :update ]
     resources :rounds, only: [ :create, :show, :edit, :update ] do
       resource :scorecard, only: [ :update ]
+      resource :scorecard_import, only: [ :new, :create ]
       resource :course_card, only: [ :edit, :update ]
       resources :matches, only: [ :create, :destroy ]
       resource :skins_game, only: [ :show ]

@@ -1,0 +1,57 @@
+<%= link_to "← Back to the round", trip_round_path(@trip, @round), class: "back" %>
+<section class="hero compact">
+  <p class="eyebrow">TIN CUP / BRING YOUR OWN SCORECARD</p>
+  <h1>Score there.<br>Compete here.</h1>
+  <p class="lede">Already tracked your round in another app? Bring in all 18 gross hole scores at once and Tin Cup updates the competition automatically.</p>
+</section>
+<div class="score-import-layout">
+  <section class="panel">
+    <p class="eyebrow">YOUR 18-HOLE CARD</p>
+    <h2><%= @round.course %></h2>
+    <p class="muted"><%= @round.plays_on.strftime("%B %-d, %Y") %> · <%= @round.tee_name.present? ? "#{@round.tee_name} tees" : "18 holes" %></p>
+    <% if @error.present? %><p class="flash alert" role="alert"><%= @error %></p><% end %>
+    <%= form_with url: trip_round_scorecard_import_path(@trip, @round), method: :post do |f| %>
+      <% if @preview %>
+        <%= hidden_field_tag :player_id, @selected_player.id %>
+        <%= hidden_field_tag :import_values, @import_values %>
+        <%= hidden_field_tag :confirm, "1" %>
+        <p class="eyebrow">PREVIEW / NOTHING SAVED YET</p>
+        <h3 class="score-import-preview-head"><%= @selected_player.name %> · <%= @preview.sum %> gross</h3>
+        <p class="muted">Check each hole before confirming. These scores will be assigned to <strong><%= @selected_player.name %></strong>.</p>
+        <div class="table-scroll"><table class="score-import-table"><thead><tr><th>Hole</th><th>Par</th><th>Gross</th></tr></thead><tbody>
+          <% @round.holes.order(:number).each_with_index do |hole, index| %>
+            <tr><td><%= hole.number %></td><td><%= hole.par %></td><td><strong><%= @preview[index] %></strong></td></tr>
+          <% end %>
+        </tbody><tfoot><tr><th>Total</th><th><%= @round.holes.sum(:par) %></th><th><%= @preview.sum %></th></tr></tfoot></table></div>
+        <% if @previous_scores.to_i.positive? %>
+          <div class="score-import-replace">
+            <%= check_box_tag :replace_existing, "1", params[:replace_existing] == "1" %>
+            <%= label_tag :replace_existing, "Replace #{@previous_scores} existing hole scores for #{@selected_player.name}" %>
+          </div>
+          <p class="muted">Other players' scores are never touched.</p>
+        <% end %>
+        <%= f.submit "Confirm & import all 18 →", class: "button button-gold" %>
+        <%= link_to "Start over", new_trip_round_scorecard_import_path(@trip, @round, player_id: @selected_player.id), class: "small-button score-import-reset" %>
+      <% else %>
+        <%= label_tag :player_id, "Who's scorecard?" %>
+        <%= select_tag :player_id, options_from_collection_for_select(@players, :id, :name, @selected_player&.id), prompt: "Choose the golfer", required: true %>
+        <%= label_tag :scores_text, "Paste 18 hole-by-hole gross scores" %>
+        <%= text_area_tag :scores_text, params[:scores_text], rows: 5, class: "score-import-input", placeholder: "4, 5, 3, 4, 5, 4, 3, 4, 5, 4, 4, 3, 5, 4, 4, 4, 3, 5" %>
+        <p class="muted">Numbers in hole order, separated by commas, spaces or lines. Structured CSV can use columns named <code>hole,strokes</code>.</p>
+        <%= label_tag :scorecard_file, "Or upload a .csv / .txt scorecard" %>
+        <%= file_field_tag :scorecard_file, accept: ".csv,.txt,text/csv,text/plain" %>
+        <p class="muted">Maximum 32 KB. You'll review the full 18-hole card before anything changes.</p>
+        <%= f.submit "Preview imported scores →", class: "button" %>
+      <% end %>
+    <% end %>
+  </section>
+  <aside class="panel score-import-guide">
+    <p class="eyebrow">SCORE ON YOUR TERMS</p>
+    <h2>One round. No double entry.</h2>
+    <p>Paste the scores you tracked in another app or upload a compatible CSV, then confirm them once. Tin Cup will calculate net scores, skins and match results.</p>
+    <div class="score-import-example"><span>HOLE</span><span>STROKES</span><span>1</span><span>4</span><span>2</span><span>5</span><span>…</span><span>…</span></div>
+    <h3>18Birdies support</h3>
+    <p>18Birdies does not currently provide a documented public scoring API or standard CSV export. Tin Cup cannot automatically connect to a private 18Birdies account or parse its screenshot/share link yet.</p>
+    <p class="muted">Never enter a third-party golf app password into Tin Cup.</p>
+  </aside>
+</div>

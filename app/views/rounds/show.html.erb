@@ -6,6 +6,12 @@
 <% end %>
 <% if @round.hole_by_hole? %>
   <div class="round-extras"><%= link_to "♠ Skins competition ↗", trip_round_skins_game_path(@trip, @round), class: "small-button" %><% if @can_manage && @round.course_confirmed? %><%= link_to "⚑ Auto-build pairings ↗", trip_round_pairing_suggestions_path(@trip, @round), class: "small-button" %><% end %></div>
+  <% if @round.course_confirmed? %>
+    <section class="score-import-banner">
+      <div><p class="eyebrow">ALREADY SCORED IN ANOTHER APP?</p><h2>Bring in your entire scorecard.</h2><p>Import 18 holes at once instead of entering each score again.</p></div>
+      <%= link_to "Import a scorecard →", new_trip_round_scorecard_import_path(@trip, @round), class: "button button-gold" %>
+    </section>
+  <% end %>
   <%= render "hole_card" %>
   <%= render "matches" %>
 <% else %>
