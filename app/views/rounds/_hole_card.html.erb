@@ -18,7 +18,7 @@
   <div><p class="eyebrow">ON-COURSE MODE</p><h3>Who are you scoring for?</h3><p class="muted">Focus on one golfer to keep your screen clear, or score everyone together.</p></div>
   <div class="score-focus-players" aria-label="Choose a golfer">
     <%= link_to "Everyone", trip_round_path(@trip, @round, hole: @hole&.number || 1, player_id: "all"), class: "score-focus-chip #{'selected' unless @scoring_player}" %>
-    <% @scoring_players.each do |player| %>
+    <% @players.each do |player| %>
       <%= link_to player.name, trip_round_path(@trip, @round, hole: @hole&.number || 1, player_id: player.id), class: "score-focus-chip #{'selected' if @scoring_player == player}" %>
     <% end %>
   </div>
@@ -40,7 +40,7 @@
 <%= form_with url: trip_round_hole_hole_scores_path(@trip, @round, @hole), method: :patch do %>
 <%= hidden_field_tag :player_id, @scoring_player&.id || ("all" if params[:player_id] == "all") %>
 <div class="scoring-grid <%= 'focus-single' if @scoring_player %>">
-  <% @players.each do |player| %>
+  <% @scoring_players.each do |player| %>
     <% result = @results[player.id] %>
     <article class="scoring-card">
       <div class="scoring-card-heading">
