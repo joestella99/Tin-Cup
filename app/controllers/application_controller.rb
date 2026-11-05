@@ -27,7 +27,11 @@ class ApplicationController < ActionController::Base
 
   def protect_private_responses
     response.headers["Cache-Control"] = "no-store"
-    response.headers["Referrer-Policy"] = "no-referrer"
+    # same-origin allows Rails to verify the origin of same-site form POSTs.
+    # no-referrer makes some browsers submit Origin: null, causing valid CSRF
+    # token-bearing registration and sign-in forms to fail with 422.
+    # Cross-origin destinations still receive no referrer.
+    response.headers["Referrer-Policy"] = "same-origin"
   end
 
   def accessible_trips

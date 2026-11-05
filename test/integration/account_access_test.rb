@@ -23,6 +23,26 @@ class AccountAccessTest < ActionDispatch::IntegrationTest
     assert_redirected_to trips_path
   end
 
+  test "public account and sign-in forms use a CSRF-compatible same-origin referrer policy" do
+    get new_registration_path
+    assert_response :success
+    assert_equal "same-origin", response.headers["Referrer-Policy"]
+    assert_equal "no-store", response.headers["Cache-Control"]
+    assert_select "form[action='#{registration_path}'][method='post']"
+    assert_select "input[name='authenticity_token']"
+
+    get new_session_path
+    assert_response :success
+    assert_equal "same-origin", response.headers["Referrer-Policy"]
+
+    post registration_path, params: { user: {
+      name: "Browser Signup", email_address: "browser@example.test",
+      password: "a-long-browser-password", password_confirmation: "a-long-browser-password"
+    } }, headers: { "HTTP_ORIGIN" => "http://www.example.com" }
+    assert_response :created
+    assert User.exists?(email_address: "browser@example.test")
+  end
+
   test "signup shows recovery code once and creates a private organizer-owned trip" do
     get new_registration_path
     assert_response :success
