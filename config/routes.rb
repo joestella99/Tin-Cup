@@ -9,7 +9,8 @@ Rails.application.routes.draw do
   get "/join/:token", to: "joins#show", as: :join
   post "/join/:token", to: "joins#create"
   resource :session, only: [ :new, :create, :destroy ]
-  resources :trips, only: [ :index, :new, :create, :show, :edit, :update ] do
+  resources :trips, only: [ :index, :new, :create, :show, :edit, :update, :destroy ] do
+    get :delete_confirmation, on: :member
     get "clubhouse", to: "clubhouses#show", as: :clubhouse
     get "clubhouse/live", to: "clubhouses#live", as: :live_clubhouse
     resource :claim, only: [ :create ]
@@ -19,9 +20,9 @@ Rails.application.routes.draw do
     resources :golf_courses, only: [ :index, :show, :create ] do
       post :refresh, on: :member
     end
-    resources :teams, only: [ :create ]
-    resources :players, only: [ :create, :update ]
-    resources :rounds, only: [ :create, :show, :edit, :update ] do
+    resources :teams, only: [ :create, :destroy ]
+    resources :players, only: [ :create, :update, :destroy ]
+    resources :rounds, only: [ :create, :show, :edit, :update, :destroy ] do
       resource :scorecard, only: [ :update ]
       resource :scorecard_import, only: [ :new, :create ]
       resource :course_card, only: [ :edit, :update ]

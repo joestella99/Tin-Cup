@@ -1,4 +1,13 @@
 class PlayersController < ApplicationController
+  def destroy
+    trip = find_trip!(manage: true)
+    player = trip.players.find(params[:id])
+    name = player.name
+    trip.with_lock { player.destroy! }
+    redirect_to trip_path(trip, view: "manage", anchor: "manage-players"),
+      notice: "#{name} removed. Their scores and match pairings were deleted.", status: :see_other
+  end
+
   def update
     trip = find_trip!(manage: true)
     player = trip.players.find(params[:id])

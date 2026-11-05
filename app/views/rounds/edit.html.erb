@@ -15,3 +15,10 @@
     <%= form.submit "Save round schedule", class: "button" %>
   <% end %>
 </section>
+<section class="panel narrow delete-zone">
+  <p class="eyebrow">DANGER ZONE</p>
+  <h2>Remove this round</h2>
+  <p>This permanently removes all scores, match results and pairings from this round.</p>
+  <%= button_to "Delete round", trip_round_path(@trip, @round), method: :delete, class: "danger-button",
+    form: { data: { turbo_confirm: "Delete #{@round.course} and every score and match in this round? This cannot be undone." } } %>
+</section>

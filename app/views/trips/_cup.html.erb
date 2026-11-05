@@ -21,6 +21,11 @@
 </strong>
 <p>
 <%= entry.played %> played · <%= entry.won %> won · <%= entry.tied %> tied</p>
+<% if @can_manage && @view == "manage" %>
+  <% affected = entry.team.players.count %>
+  <%= button_to "Delete team", trip_team_path(trip, entry.team), method: :delete, class: "danger-link",
+    form: { data: { turbo_confirm: "Delete #{entry.team.name}? #{affected} #{'golfer'.pluralize(affected)} will be unassigned and all singles matches involving them will be removed. Their individual scores will remain." } } %>
+<% end %>
 </article>
 <% end %>
 </div>
@@ -28,7 +33,7 @@
 <p class="muted">Two teams or twenty. Add your teams, assign the group, then set singles pairings on each hole-by-hole round.</p>
 <% end %>
 <p class="muted">Points count only when a match is final. Teams on equal points are tied. For a balanced cup, schedule the same number of matches per team; pairings are set by the organizer.</p>
-<% if @can_manage %>
+<% if @can_manage && @view == "manage" %>
 <details class="setup-details">
 <summary>
 <%= teams.any? ? "Add another team" : "Add the first team" %>

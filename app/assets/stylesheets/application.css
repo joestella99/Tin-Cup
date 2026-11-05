@@ -195,3 +195,32 @@ select{width:100%;padding:12px;border:1px solid #bdc8ba;border-radius:3px;backgr
 .score-import-replace{display:flex;align-items:center;gap:10px;padding:17px;margin:21px 0 8px;background:#f3ead6;border-radius:8px}.score-import-replace input{width:auto!important}.score-import-replace label{margin:0}
 .score-import-reset{display:inline-block;margin-left:9px}.score-import-input:focus-visible{outline:3px solid #bba052}
 @media(max-width:800px){.score-import-layout{grid-template-columns:1fr}.score-import-banner{flex-direction:column;align-items:flex-start}.score-import-banner .button{white-space:normal}}
+
+
+/* Organizer-only destructive actions: conspicuous, legible, and separated from ordinary editing. */
+.management-area,.delete-zone{scroll-margin-top:95px}
+.management-area .hq-section-head{margin-bottom:13px}
+.management-row{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:17px 0;border-top:1px solid var(--line)}
+.management-item{min-width:0;display:flex;flex-direction:column;gap:5px}
+.management-item strong{overflow-wrap:anywhere;font-size:15px}
+.management-item span{color:var(--muted);font-size:12px}
+.management-actions{display:flex;align-items:center;gap:12px;flex-shrink:0}
+.management-actions .small-button{margin:0}
+.danger-link{appearance:none;border:1px solid transparent;background:transparent;color:#a54239;cursor:pointer;font:700 12px/1.35 'DM Sans',sans-serif;text-decoration:underline;text-underline-offset:3px;padding:9px 10px;border-radius:6px}
+.danger-link:hover{background:#f9e8e3;border-color:#e5c4bc}
+.danger-link:focus-visible,.danger-button:focus-visible{outline:3px solid #bf6458;outline-offset:3px}
+.roster-player .danger-link{margin:5px 0 0}
+.team-tile .danger-link{margin-top:13px}
+.delete-zone{margin:24px 0;border:1px solid #e1b9b2;background:#fff7f3;padding:26px}
+.delete-zone h2{margin:7px 0 11px}.delete-zone>p:not(.eyebrow){font-size:13px;color:#704e48;line-height:1.65;max-width:720px}
+.danger-button{appearance:none;border:1px solid #ab453d;background:#a34239;color:white;border-radius:7px;padding:13px 17px;min-height:44px;font:700 13px/1.2 'DM Sans',sans-serif;cursor:pointer}
+.danger-button:hover{background:#832f2c;color:white}
+.danger-button-link{display:inline-block;text-decoration:none}
+.delete-confirmation{border-top:4px solid #b14f47}
+.delete-confirmation>p{font-size:14px;line-height:1.75}
+.delete-counts{display:flex;gap:12px;flex-wrap:wrap;margin:20px 0;padding:15px;background:#f7ece5;border-radius:7px}
+.delete-counts span{flex:1;min-width:94px;font-size:12px;color:#674940}
+.delete-counts strong{display:block;font:28px Georgia,serif;color:#8d3731}
+.delete-actions{display:flex;align-items:center;gap:15px;flex-wrap:wrap;margin-top:20px}
+.delete-actions .small-button{white-space:nowrap}
+@media(max-width:700px){.management-row{align-items:flex-start}.management-actions{flex-wrap:wrap;gap:5px}.delete-actions{align-items:stretch;flex-direction:column}.delete-actions .small-button{text-align:center}}

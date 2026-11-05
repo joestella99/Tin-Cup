@@ -18,6 +18,15 @@ class RoundsController < ApplicationController
     redirect_to trip, alert: error.record.errors.full_messages.to_sentence
   end
 
+  def destroy
+    trip = find_trip!(manage: true)
+    round = trip.rounds.find(params[:id])
+    course = round.course
+    trip.with_lock { round.destroy! }
+    redirect_to trip_path(trip, view: "manage", anchor: "manage-rounds"),
+      notice: "#{course} removed from the itinerary, including its scores and matches.", status: :see_other
+  end
+
   def edit
     @trip = find_trip!(manage: true)
     @round = @trip.rounds.find(params[:id])

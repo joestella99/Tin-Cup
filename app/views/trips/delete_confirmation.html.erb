@@ -1,0 +1,25 @@
+<%= link_to "← Back to Captain's Desk", trip_path(@trip, view: "manage"), class: "back" %>
+<section class="hero compact">
+  <p class="eyebrow">CAPTAIN'S DESK / PERMANENT DELETION</p>
+  <h1>Delete this trip?</h1>
+  <p class="lede">This is permanent. There is no undo.</p>
+</section>
+<section class="panel narrow delete-confirmation">
+  <p class="eyebrow">YOU'RE ABOUT TO DELETE</p>
+  <h2><%= @trip.name %></h2>
+  <p>This removes the trip and <strong>all associated tournament data</strong>—players, teams, rounds, hole scores, matches, leaderboards, invitations and spectator links. Other trips and shared course-library entries are unaffected.</p>
+  <div class="delete-counts">
+    <span><strong><%= @trip.players.count %></strong> golfers</span>
+    <span><strong><%= @trip.rounds.count %></strong> rounds</span>
+    <span><strong><%= @trip.teams.count %></strong> teams</span>
+  </div>
+  <% if @deletion_error %><p class="flash alert" role="alert"><%= @deletion_error %></p><% end %>
+  <%= form_with url: trip_path(@trip), method: :delete do |f| %>
+    <%= label_tag :confirmation_name, "Type #{@trip.name} to permanently delete it" %>
+    <%= text_field_tag :confirmation_name, nil, required: true, autocomplete: "off", spellcheck: false, placeholder: @trip.name %>
+    <div class="delete-actions">
+      <%= f.submit "Permanently delete trip", class: "danger-button" %>
+      <%= link_to "Cancel · keep this trip", trip_path(@trip, view: "manage"), class: "small-button" %>
+    </div>
+  <% end %>
+</section>

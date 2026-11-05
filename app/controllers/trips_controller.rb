@@ -31,6 +31,22 @@ class TripsController < ApplicationController
     end
   end
 
+  def delete_confirmation
+    @trip = find_trip!(manage: true)
+  end
+
+  def destroy
+    @trip = find_trip!(manage: true)
+    unless ActiveSupport::SecurityUtils.secure_compare(params[:confirmation_name].to_s.strip, @trip.name)
+      @deletion_error = "Type the exact trip name to confirm deletion."
+      return render :delete_confirmation, status: :unprocessable_entity
+    end
+
+    name = @trip.name
+    @trip.destroy!
+    redirect_to trips_path, notice: "#{name} was permanently deleted, along with its rounds, golfers, matches and scores.", status: :see_other
+  end
+
   def show
     @trip = find_trip!
     @can_manage = organizer_for?(@trip)

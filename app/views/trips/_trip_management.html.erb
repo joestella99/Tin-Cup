@@ -1,0 +1,28 @@
+<section class="panel management-area" id="manage-rounds">
+  <div class="hq-section-head">
+    <div><p class="eyebrow">03 / ITINERARY MANAGEMENT</p><h2>Manage rounds</h2></div>
+    <%= link_to "+ Schedule a round", trip_path(trip, view: "manage", anchor: "schedule-round"), class: "small-button" %>
+  </div>
+  <p class="muted">Removing a round also removes its hole scores, match pairings and results. Other rounds stay as they are.</p>
+  <% rounds.each do |round| %>
+    <div class="management-row">
+      <div class="management-item">
+        <strong><%= round.course %></strong>
+        <span><%= round.plays_on.strftime("%B %-d, %Y") %> · <%= round.hole_by_hole? ? "Hole by hole" : "Total scores" %></span>
+      </div>
+      <div class="management-actions">
+        <%= link_to "Edit", edit_trip_round_path(trip, round), class: "small-button" %>
+        <%= button_to "Delete round", trip_round_path(trip, round), method: :delete, class: "danger-link",
+          form: { data: { turbo_confirm: "Permanently delete the round at #{round.course} on #{round.plays_on.strftime('%B %-d')}? All scores and match results for this round will also be deleted." } } %>
+      </div>
+    </div>
+  <% end %>
+  <% if rounds.empty? %><p class="empty">No rounds scheduled yet.</p><% end %>
+</section>
+
+<section class="panel delete-zone">
+  <p class="eyebrow">DANGER ZONE / ENTIRE TRIP</p>
+  <h2>Delete this tournament</h2>
+  <p>Only the captain can remove an entire trip. You'll need to type the trip's name on a separate confirmation screen.</p>
+  <%= link_to "Delete trip permanently →", delete_confirmation_trip_path(trip), class: "danger-button danger-button-link" %>
+</section>

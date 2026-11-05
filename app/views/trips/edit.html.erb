@@ -6,3 +6,9 @@
 <section class="panel narrow">
   <%= render "form", submit_label: "Save trip details" %>
 </section>
+<section class="panel narrow delete-zone">
+  <p class="eyebrow">DANGER ZONE</p>
+  <h2>Delete this trip</h2>
+  <p>Remove the entire tournament, its players and every score. This cannot be undone.</p>
+  <%= link_to "Delete trip permanently →", delete_confirmation_trip_path(@trip), class: "danger-button danger-button-link" %>
+</section>
