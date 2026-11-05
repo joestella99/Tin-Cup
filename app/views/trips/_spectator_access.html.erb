@@ -1,0 +1,19 @@
+<section class="panel spectator-manage" id="spectator-access">
+  <p class="eyebrow">THE WATCH PARTY</p>
+  <h2>Let everyone follow the Cup.</h2>
+  <p>Give friends and family a broadcast view with live standings and match drama. No account needed. Spectators cannot change anything.</p>
+  <% if pass %>
+    <p class="spectator-enabled">● Spectator broadcast is enabled</p>
+    <div class="copy-field" data-controller="clipboard">
+      <label for="watch-link">Private spectator link</label>
+      <input id="watch-link" type="text" value="<%= watch_url(pass.share_token) %>" readonly data-clipboard-target="source" autocomplete="off" spellcheck="false">
+      <button type="button" class="small-button" data-action="clipboard#copy" data-clipboard-target="button">Copy link</button>
+      <span role="status" data-clipboard-target="status"></span>
+    </div>
+    <div class="spectator-controls"><%= link_to "Preview broadcast →", watch_path(pass.share_token), class: "button" %>
+    <%= button_to "Revoke spectator link", trip_spectator_pass_path(trip, pass), method: :delete, class: "small-button", form: { data: { turbo_confirm: "Disable this spectator link? Anyone using it will lose access." } } %></div>
+  <% else %>
+    <%= button_to "Enable spectator broadcast →", trip_spectator_passes_path(trip), class: "button" %>
+  <% end %>
+  <p class="spectator-privacy"><strong>Privacy:</strong> Anyone with the link can see the trip name, courses, players' names, match results and scores. It is off by default; share only with people you trust. You can revoke access at any time.</p>
+</section>

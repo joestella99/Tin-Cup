@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_11_05_000000) do
+ActiveRecord::Schema[8.1].define(version: 2026_11_05_010000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -137,6 +137,14 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_05_000000) do
     t.check_constraint "gross > 0", name: "scores_positive_gross"
   end
 
+  create_table "spectator_passes", force: :cascade do |t|
+    t.bigint "trip_id", null: false
+    t.datetime "revoked_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["trip_id"], name: "index_spectator_passes_on_trip_id"
+  end
+
   create_table "teams", force: :cascade do |t|
     t.bigint "trip_id", null: false
     t.string "name", null: false
@@ -181,5 +189,6 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_05_000000) do
   add_foreign_key "rounds", "trips"
   add_foreign_key "scores", "players"
   add_foreign_key "scores", "rounds"
+  add_foreign_key "spectator_passes", "trips"
   add_foreign_key "teams", "trips"
 end

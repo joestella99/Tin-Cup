@@ -1,0 +1,60 @@
+<%= turbo_frame_tag "spectator_live" do %>
+  <div class="watch-refresh"><span><span class="watch-live-dot"></span> Live results · Refreshes every 25 seconds</span><button class="small-button" type="button" data-action="live-refresh#refresh">↻ Refresh</button></div>
+  <section class="watch-story">
+    <p class="eyebrow"><%= pulse.story.kicker %></p>
+    <h2><%= pulse.story.headline %></h2>
+    <p><%= pulse.story.detail %></p>
+  </section>
+  <% if board.round %>
+    <div class="watch-round">
+      <div><p class="eyebrow">ON THE COURSE · <%= board.round.plays_on.strftime("%b %-d") %></p><h2><%= board.round.course %></h2></div>
+      <span><%= board.round_progress %>% scored</span>
+    </div>
+    <div class="hq-meter" role="progressbar" aria-label="Round scoring progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="<%= board.round_progress %>"><span style="width: <%= board.round_progress %>%"></span></div>
+    <div class="watch-grid">
+      <section class="panel">
+        <p class="eyebrow">THE ROUND LEADERBOARD</p><h2>On the board</h2>
+        <div class="live-standings">
+          <% board.standings.each_with_index do |standing, index| %>
+            <% value = board.round.hole_by_hole? ? standing.net_to_par : standing.net %>
+            <div class="live-score-row">
+              <span class="live-position"><%= "%02d" % (index + 1) %></span>
+              <span class="live-player"><strong><%= standing.player.name %></strong><small><%= standing.player.team&.name || "Independent" %> · <%= standing.holes == 18 ? "F" : "Thru #{standing.holes}" %></small></span>
+              <strong class="live-total"><%= value.nil? ? "—" : (board.round.hole_by_hole? && value.positive? ? "+#{value}" : value) %></strong>
+            </div>
+          <% end %>
+        </div>
+        <% if board.standings.empty? %><p class="empty">The leaderboard will come alive as scores are entered.</p><% end %>
+        <p class="muted watch-disclaimer">Provisional leaderboard; golfers may have completed different numbers of holes.</p>
+      </section>
+      <section class="panel">
+        <p class="eyebrow">THE TEAM BATTLE</p><h2>The Cup</h2>
+        <% board.cup_standings.each do |entry| %>
+          <div class="watch-cup-row"><strong><%= entry.team.name %></strong><span><%= number_with_precision(entry.points, precision: 1, strip_insignificant_zeros: true) %> pts</span></div>
+        <% end %>
+        <% if board.cup_standings.empty? %><p class="empty">Teams are still forming.</p><% end %>
+        <p class="muted watch-disclaimer">Final matches award 1 point per win, half a point per tie.</p>
+      </section>
+    </div>
+    <% if board.matchups.any? %>
+      <section class="panel"><p class="eyebrow">MATCHES TO WATCH</p><h2>Head-to-head</h2>
+        <div class="watch-match-grid">
+          <% board.matchups.each do |matchup| %>
+            <% result = matchup.result; match = matchup.match %>
+            <article class="watch-match"><span class="match-status <%= result.status %>"><%= result.status.to_s.upcase %></span><h3><%= match.home_player.name %> <small>vs</small> <%= match.away_player.name %></h3>
+            <p><%= result.status == :scheduled ? "First tee awaits" : (result.leader ? "#{result.leader.name} #{result.status == :final ? 'wins' : 'leads'} by #{result.margin}" : "All square") %> · Thru <%= result.through %></p></article>
+          <% end %>
+        </div>
+      </section>
+    <% end %>
+    <% if board.moments.any? %>
+      <section class="panel"><p class="eyebrow">THE HIGHLIGHT REEL</p><h2>Big moments</h2><div class="live-moments">
+        <% board.moments.first(5).each do |moment| %>
+          <article class="live-moment"><span class="live-moment-mark <%= moment.kind %>"><%= moment.kind == :ace ? "★" : "−#{moment.hole.par - moment.strokes}" %></span><div><strong><%= moment.player.name %> · <%= moment.label %></strong><p><%= moment.round.course %> · Hole <%= moment.hole.number %></p></div></article>
+        <% end %>
+      </div></section>
+    <% end %>
+  <% else %>
+    <section class="panel watch-awaiting"><p class="eyebrow">FIRST TEE AWAITS</p><h2>Every championship has an opening shot.</h2><p>The organizer is setting the itinerary. Check back when the first round begins.</p></section>
+  <% end %>
+<% end %>

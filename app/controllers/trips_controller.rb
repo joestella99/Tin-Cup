@@ -35,6 +35,7 @@ class TripsController < ApplicationController
     @trip = find_trip!
     @can_manage = organizer_for?(@trip)
     @active_invitation = @trip.invitations.active.order(created_at: :desc).first if @can_manage
+    @spectator_pass = @trip.spectator_passes.active.order(created_at: :desc).first if @can_manage
     @entries = Leaderboard.for(@trip)
     @cup_entries = CupStandings.for(@trip)
     @teams = @trip.teams.order(:name)

@@ -7,6 +7,7 @@
   </div>
   <div class="hq-hero-actions">
     <%= link_to "⚑ Live clubhouse", trip_clubhouse_path(@trip), class: "button button-gold" %>
+    <% if @spectator_pass %><%= link_to "Watch party ↗", watch_path(@spectator_pass.share_token), class: "hq-secondary-link" %><% end %>
     <% if @can_manage %><%= link_to "Invite friends", trip_path(@trip, view: "manage", anchor: "trip-access"), class: "hq-secondary-link" %><% end %>
   </div>
 </header>
@@ -132,4 +133,5 @@
   <section id="manage-teams"><%= render "cup", trip: @trip, entries: @cup_entries, teams: @teams %></section>
   <%= render "roster", trip: @trip, teams: @teams %>
   <%= render "access", trip: @trip, invitation: @active_invitation %>
+  <%= render "spectator_access", trip: @trip, pass: @spectator_pass %>
 <% end %>

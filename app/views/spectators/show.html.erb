@@ -1,0 +1,14 @@
+<header class="watch-hero">
+  <p class="eyebrow">TIN CUP / THE WATCH PARTY</p>
+  <h1><%= @trip.name %></h1>
+  <p><%= @trip.destination %> · <%= @trip.starts_on.strftime("%B %-d") %> – <%= @trip.ends_on.strftime("%B %-d, %Y") %></p>
+  <div class="watch-hero-bottom"><span class="watch-live-dot"></span> LIVE SCOREBOARD <span class="watch-readonly">READ-ONLY · NO SIGN-IN NEEDED</span></div>
+</header>
+<%= turbo_frame_tag "spectator_live", src: watch_live_path(@pass.share_token), loading: :eager,
+  data: { controller: "live-refresh", live_refresh_interval_value: 25000 } do %>
+  <section class="panel"><p class="muted">Loading the latest tournament scores…</p></section>
+<% end %>
+<footer class="watch-footer">
+  <span>Every trip deserves a championship.</span>
+  <%= link_to "Run your own Cup with Tin Cup →", new_registration_path %>
+</footer>
