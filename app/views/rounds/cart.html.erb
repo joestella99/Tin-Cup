@@ -1,5 +1,17 @@
 <% content_for :body_class, "cart-mode-page" %>
-<div class="cart-shell">
+<div class="cart-shell"<% if @scoring_player %> data-controller="cart-offline" data-action="online@window->cart-offline#retry storage@window->cart-offline#storageChanged" data-cart-offline-state-value="<%= {
+  scope: current_user ? "user-#{current_user.id}" : "legacy-organizer",
+  tripId: @trip.id, roundId: @round.id, playerId: @scoring_player.id,
+  handicap: @scoring_player.playing_handicap,
+  initialHole: @hole.number,
+  explicitHole: params[:hole].present?,
+  cartPath: cart_trip_round_path(@trip, @round, player_id: @scoring_player.id),
+  holes: @card.holes.map { |hole| {
+    number: hole.number, id: hole.id, par: hole.par, strokeIndex: hole.stroke_index,
+    yardage: hole.yardage, strokes: @card.score_for(hole)&.strokes,
+    postPath: trip_round_hole_hole_scores_path(@trip, @round, hole)
+  } }
+}.to_json %>"<% end %>>
   <header class="cart-topbar">
     <%= link_to trip_path(@trip), class: "cart-brand", aria: { label: "Return to #{@trip.name}" } do %>
       <span class="cart-flag" aria-hidden="true">⚑</span> TIN CUP
@@ -50,35 +62,52 @@
       </div>
     <% end %>
 
+    <div class="cart-sync-indicator" data-cart-offline-target="syncIndicator" role="status" aria-live="polite" hidden>
+      <span data-cart-offline-target="syncText"></span>
+      <button type="button" data-action="cart-offline#retry" class="cart-sync-retry" data-cart-offline-target="retryButton" hidden>Sync now</button>
+    </div>
+    <div class="cart-conflict" data-cart-offline-target="conflictPanel" hidden>
+      <strong>Two different scores for this hole</strong>
+      <p data-cart-offline-target="conflictText"></p>
+      <div>
+        <button type="button" data-action="cart-offline#keepDevice" class="cart-conflict-action">Use my device score</button>
+        <button type="button" data-action="cart-offline#keepServer" class="cart-conflict-action subtle">Keep the server score</button>
+      </div>
+    </div>
+    <div class="cart-local-toast" data-cart-offline-target="feedback" role="status" aria-live="polite" hidden>
+      <span data-cart-offline-target="feedbackText"></span>
+      <button type="button" data-action="cart-offline#editLast" class="cart-toast-edit">Edit ↗</button>
+    </div>
     <section class="cart-hole-hero" aria-label="Current hole">
-      <div class="cart-hero-overline"><span><%= @round.tee_name.presence ? "#{@round.tee_name.upcase} TEES" : "THE SCORECARD" %></span><span><%= @card.completed_holes %> / 18 SCORED</span></div>
+      <div class="cart-hero-overline"><span><%= @round.tee_name.presence ? "#{@round.tee_name.upcase} TEES" : "THE SCORECARD" %></span><span><span data-cart-offline-target="scoredCount"><%= @card.completed_holes %></span> / 18 SCORED</span></div>
       <div class="cart-hole-main">
-        <div class="cart-hole-number"><small>HOLE</small><strong><%= "%02d" % @hole.number %></strong></div>
+        <div class="cart-hole-number"><small>HOLE</small><strong data-cart-offline-target="holeNumber"><%= "%02d" % @hole.number %></strong></div>
         <div class="cart-hole-details">
-          <div><small>PAR</small><strong><%= @hole.par %></strong></div>
-          <div><small><%= @hole.yardage ? "YARDS" : "STROKE INDEX" %></small><strong><%= @hole.yardage || @hole.stroke_index %></strong></div>
-          <% if @hole.yardage %><span>HCP INDEX <%= @hole.stroke_index %></span><% end %>
+          <div><small>PAR</small><strong data-cart-offline-target="par"><%= @hole.par %></strong></div>
+          <div><small data-cart-offline-target="secondaryLabel"><%= @hole.yardage ? "YARDS" : "STROKE INDEX" %></small><strong data-cart-offline-target="secondaryValue"><%= @hole.yardage || @hole.stroke_index %></strong></div>
+          <span data-cart-offline-target="strokeIndex" <%= "hidden" unless @hole.yardage %>>HCP INDEX <%= @hole.stroke_index %></span>
         </div>
       </div>
-      <div class="cart-progress-track" role="progressbar" aria-label="Holes scored" aria-valuemin="0" aria-valuemax="100" aria-valuenow="<%= @card.progress %>"><span style="width: <%= @card.progress %>%"></span></div>
+      <div class="cart-progress-track" role="progressbar" aria-label="Holes scored" aria-valuemin="0" aria-valuemax="100" aria-valuenow="<%= @card.progress %>" data-cart-offline-target="progress"><span data-cart-offline-target="progressFill" style="width: <%= @card.progress %>%"></span></div>
     </section>
 
     <nav class="cart-hole-nav" aria-label="Jump to a hole">
       <% @card.holes.each do |hole| %>
         <%= link_to hole.number, cart_trip_round_path(@trip, @round, player_id: @scoring_player.id, hole: hole.number),
           class: "cart-hole-link #{'active' if hole == @hole} #{'recorded' if @card.score_for(hole)}",
+          data: { cart_hole: hole.number },
           aria: { current: hole == @hole ? "page" : nil, label: "Hole #{hole.number}#{@card.score_for(hole) ? ', already scored' : ''}" } %>
       <% end %>
     </nav>
 
     <div class="cart-stats" aria-label="Your live round">
-      <div><small>GROSS TO PAR</small><strong><%= @card.completed_holes.positive? ? @card.display_to_par(@card.to_par) : "—" %></strong></div>
-      <div><small>NET TO PAR</small><strong><%= @card.completed_holes.positive? ? @card.display_to_par(@card.net_to_par) : "—" %></strong></div>
-      <div><small>HOLES IN</small><strong><%= @card.completed_holes %><em>/18</em></strong></div>
+      <div><small>GROSS TO PAR</small><strong data-cart-offline-target="gross"><%= @card.completed_holes.positive? ? @card.display_to_par(@card.to_par) : "—" %></strong></div>
+      <div><small>NET TO PAR</small><strong data-cart-offline-target="net"><%= @card.completed_holes.positive? ? @card.display_to_par(@card.net_to_par) : "—" %></strong></div>
+      <div><small>HOLES IN</small><strong><span data-cart-offline-target="completed"><%= @card.completed_holes %></span><em>/18</em></strong></div>
     </div>
 
     <% if @card.completed? && params[:hole].blank? %>
-      <section class="cart-finished">
+      <section class="cart-finished" data-cart-offline-target="finished">
         <span class="cart-finish-mark" aria-hidden="true">★</span>
         <p class="cart-kicker">ALL 18 IN THE BOOKS</p>
         <h2>That's a wrap.</h2>
@@ -87,14 +116,14 @@
         <%= link_to "Review my holes", cart_trip_round_path(@trip, @round, player_id: @scoring_player.id, hole: 1), class: "cart-subtle-link" %>
       </section>
     <% else %>
-      <section class="cart-score-entry">
-        <div class="cart-score-heading"><div><p class="cart-kicker">JUST FINISHED THE HOLE?</p><h2><%= @previous_score ? "Change your score." : "How'd you do?" %></h2></div><% if @previous_score %><span class="cart-saved-chip">✓ SAVED <%= @previous_score.strokes %></span><% end %></div>
-        <p class="cart-instruction">One tap saves your score and loads the next hole.</p>
+      <section class="cart-score-entry" data-cart-offline-target="scoreEntry">
+        <div class="cart-score-heading"><div><p class="cart-kicker">JUST FINISHED THE HOLE?</p><h2 data-cart-offline-target="headline"><%= @previous_score ? "Change your score." : "How'd you do?" %></h2></div><% if @previous_score %><span class="cart-saved-chip" data-cart-offline-target="savedChip">✓ SAVED <%= @previous_score.strokes %></span><% end %></div>
+        <p class="cart-instruction">One tap records your score, even when reception drops. Pending scores sync when you're back online.</p>
         <%= form_with url: trip_round_hole_hole_scores_path(@trip, @round, @hole), method: :patch,
-          class: "cart-score-form", data: { controller: "cart-score", action: "submit->cart-score#submit turbo:submit-end->cart-score#complete" } do %>
+          class: "cart-score-form", data: { cart_offline_target: "form", action: "submit->cart-offline#score" } do %>
           <%= hidden_field_tag :player_id, @scoring_player.id %>
           <%= hidden_field_tag :cart_mode, "1" %>
-          <div class="cart-score-buttons">
+          <div class="cart-score-buttons" data-cart-offline-target="scoreButtons">
             <% @score_choices.each do |choice| %>
               <button type="submit" name="strokes[<%= @scoring_player.id %>]" value="<%= choice.strokes %>"
                 class="cart-score-button <%= 'is-par' if choice.label == 'PAR' %> <%= 'is-saved' if @previous_score&.strokes == choice.strokes %>"
@@ -107,18 +136,18 @@
             <summary>Different score? Enter it here <span aria-hidden="true">＋</span></summary>
             <div class="cart-other-body">
               <%= label_tag :custom_strokes, "Gross strokes (1–30)" %>
-              <%= number_field_tag :custom_strokes, nil, min: 1, max: 30, step: 1, inputmode: "numeric", placeholder: "Strokes" %>
+              <%= number_field_tag :custom_strokes, nil, min: 1, max: 30, step: 1, inputmode: "numeric", placeholder: "Strokes", data: { cart_offline_target: "customScore" } %>
               <button type="submit" name="save_custom" value="1" class="cart-custom-save">Save custom score →</button>
             </div>
           </details>
           <% if @previous_score %>
-            <button type="submit" name="strokes[<%= @scoring_player.id %>]" value="" class="cart-clear-score" data-turbo-confirm="Clear your score for hole <%= @hole.number %>?">↶ Clear saved score</button>
+            <button type="submit" name="strokes[<%= @scoring_player.id %>]" value="" class="cart-clear-score" data-cart-offline-target="clearButton" data-turbo-confirm="Clear your score for hole <%= @hole.number %>?">↶ Clear saved score</button>
           <% end %>
-          <p class="cart-save-status" data-cart-score-target="status" role="status" aria-live="polite"></p>
+          <p class="cart-save-status" data-cart-offline-target="status" role="status" aria-live="polite"></p>
         <% end %>
         <div class="cart-hole-paging">
-          <% if @hole.number > 1 %><%= link_to "← Hole #{@hole.number - 1}", cart_trip_round_path(@trip, @round, player_id: @scoring_player.id, hole: @hole.number - 1) %><% end %>
-          <% if @hole.number < 18 %><%= link_to "Skip to hole #{@hole.number + 1} →", cart_trip_round_path(@trip, @round, player_id: @scoring_player.id, hole: @hole.number + 1) %><% end %>
+          <% if @hole.number > 1 %><%= link_to "← Hole #{@hole.number - 1}", cart_trip_round_path(@trip, @round, player_id: @scoring_player.id, hole: @hole.number - 1), data: { cart_hole: @hole.number - 1 } %><% end %>
+          <% if @hole.number < 18 %><%= link_to "Skip to hole #{@hole.number + 1} →", cart_trip_round_path(@trip, @round, player_id: @scoring_player.id, hole: @hole.number + 1), data: { cart_hole: @hole.number + 1 } %><% end %>
         </div>
       </section>
     <% end %>
@@ -126,7 +155,7 @@
     <% if @match_result %>
       <aside class="cart-rivalry">
         <div><p class="cart-kicker">YOUR HEAD-TO-HEAD</p><h3><%= @match.home_player.name %> <span>vs</span> <%= @match.away_player.name %></h3></div>
-        <div class="cart-rivalry-result">
+        <div class="cart-rivalry-result" data-cart-offline-target="matchState">
           <% if @match_result.status == :scheduled %><strong>NOT STARTED</strong>
           <% elsif @match_result.leader.nil? %><strong>ALL SQUARE</strong>
           <% else %><strong><%= @match_result.margin %> UP <%= @match_result.status == :final ? "· FINAL" : "" %></strong><% end %>
