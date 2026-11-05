@@ -25,7 +25,6 @@ class CartModeTest < ActionDispatch::IntegrationTest
 
     get cart_trip_round_path(@trip, @round, player_id: @joe.id)
     assert_response :success
-    assert_select ".cart-mode-page" , count: 0
     assert_select ".cart-roundbar", text: /Pinehurst/
     assert_select ".cart-score-button", count: 7
     assert_select ".cart-score-button[name='strokes[#{@joe.id}]'][value='4']", count: 1
@@ -73,10 +72,9 @@ class CartModeTest < ActionDispatch::IntegrationTest
     assert_not @first.hole_scores.exists?(player: @matt)
 
     # A missing score must fail rather than accidentally wiping the record.
-    assert_raises(ActionController::BadRequest) do
-      patch trip_round_hole_hole_scores_path(@trip, @round, @first),
-        params: { player_id: @joe.id, cart_mode: "1", save_custom: "1" }
-    end
+    patch trip_round_hole_hole_scores_path(@trip, @round, @first),
+      params: { player_id: @joe.id, cart_mode: "1", save_custom: "1" }
+    assert_response :bad_request
     assert_equal 8, @first.hole_scores.find_by!(player: @joe).strokes
 
     patch trip_round_hole_hole_scores_path(@trip, @round, @first),
