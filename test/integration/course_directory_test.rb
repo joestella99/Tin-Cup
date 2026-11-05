@@ -1,5 +1,4 @@
 require "test_helper"
-require "minitest/mock"
 
 class CourseDirectoryTest < ActionDispatch::IntegrationTest
   setup do
@@ -16,13 +15,13 @@ class CourseDirectoryTest < ActionDispatch::IntegrationTest
   teardown { ENV["ORGANIZER_PASSWORD"] = @old_password }
 
   test "search, import and schedule copy a complete source scorecard into new round" do
-    OpenGolfApi.stub(:search, [@source]) do
+    with_api_response(:search, [@source]) do
       get trip_golf_courses_path(@trip), params: { q: "Pinehurst" }
       assert_response :success
       assert_select ".course-db-card h3", text: "Pinehurst Test Course"
     end
 
-    OpenGolfApi.stub(:course, @source) do
+    with_api_response(:course, @source) do
       post trip_golf_courses_path(@trip), params: { external_id: @source_id }
     end
     imported = GolfCourse.find_by!(external_id: @source_id)
@@ -56,11 +55,22 @@ class CourseDirectoryTest < ActionDispatch::IntegrationTest
 
   test "upstream failure keeps saved directory browsable" do
     saved = GolfCourse.import!(@source)
-    OpenGolfApi.stub(:search, ->(_q) { raise OpenGolfApi::Unavailable, "down" }) do
+    with_api_response(:search, ->(_q) { raise OpenGolfApi::Unavailable, "down" }) do
       get trip_golf_courses_path(@trip), params: { q: "Pinehurst" }
       assert_response :success
       assert_select ".course-db-card h3", text: saved.name
       assert_select ".course-db-attribution", count: 1
     end
+  end
+  private
+
+  def with_api_response(method_name, value)
+    original = OpenGolfApi.method(method_name)
+    OpenGolfApi.define_singleton_method(method_name) do |*args|
+      value.respond_to?(:call) ? value.call(*args) : value
+    end
+    yield
+  ensure
+    OpenGolfApi.define_singleton_method(method_name, original) if original
   end
 end
