@@ -21,13 +21,23 @@ class GolfCoursesController < ApplicationController
 
   def show
     @course = GolfCourse.find(params[:id])
+    @selected_tee = @course.tee_names.find { |name| name == params[:tee] } || @course.tee_names.first
+  end
+
+  def refresh
+    raise ActiveRecord::RecordNotFound unless organizer_for?(@trip)
+    course = GolfCourse.find(params[:id])
+    GolfCourse.import!(OpenGolfApi.full_course(course.external_id))
+    redirect_to trip_golf_course_path(@trip, course), notice: "Scorecard and tee information refreshed from the course directory."
+  rescue OpenGolfApi::Unavailable, ArgumentError, ActiveRecord::RecordInvalid => error
+    redirect_to trip_golf_course_path(@trip, params[:id]), alert: "Could not refresh course data: #{error.message}"
   end
 
   def create
     raise ActiveRecord::RecordNotFound unless organizer_for?(@trip)
     external_id = params.require(:external_id).to_s
     course = GolfCourse.find_by(external_id: external_id)
-    course ||= GolfCourse.import!(OpenGolfApi.course(external_id))
+    course ||= GolfCourse.import!(OpenGolfApi.full_course(external_id))
     redirect_to trip_path(@trip, selected_course_id: course.id, anchor: "schedule-round"),
       notice: "#{course.name} added to the course library. Choose your date to schedule it."
   rescue OpenGolfApi::Unavailable, ArgumentError, KeyError, ActiveRecord::RecordInvalid => error

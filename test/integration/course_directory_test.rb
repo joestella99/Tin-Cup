@@ -21,7 +21,7 @@ class CourseDirectoryTest < ActionDispatch::IntegrationTest
       assert_select ".course-db-card h3", text: "Pinehurst Test Course"
     end
 
-    with_api_response(:course, @source) do
+    with_api_response(:full_course, @source) do
       post trip_golf_courses_path(@trip), params: { external_id: @source_id }
     end
     imported = GolfCourse.find_by!(external_id: @source_id)

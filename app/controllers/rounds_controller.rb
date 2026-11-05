@@ -1,10 +1,11 @@
 class RoundsController < ApplicationController
   def create
     trip = find_trip!(manage: true)
-    attributes = params.require(:round).permit(:course, :plays_on, :scoring_mode, :golf_course_id)
+    attributes = params.require(:round).permit(:course, :plays_on, :scoring_mode, :golf_course_id, :tee_name)
     selected_id = attributes.delete(:golf_course_id)
     selected_course = selected_id.present? ? GolfCourse.find(selected_id) : nil
     attributes[:course] = selected_course.name if selected_course
+    attributes.delete(:tee_name) unless selected_course
     round = trip.rounds.build(attributes)
     round.golf_course = selected_course
     trip.with_lock do

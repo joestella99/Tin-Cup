@@ -1,20 +1,56 @@
 <%= link_to "← Course directory", trip_golf_courses_path(@trip), class: "back" %>
 <section class="course-db-hero course-db-hero-small">
-  <p class="eyebrow">TIN CUP / COURSE PROFILE</p>
+  <p class="eyebrow">TIN CUP / THE COURSE BOOK</p>
   <h1><%= @course.name %></h1>
   <p><%= @course.location.presence || "Location not listed" %></p>
-  <div class="course-db-profile-stats"><span><%= @course.par_total ? "PAR #{@course.par_total}" : "PAR TBD" %></span><span><%= @course.holes_count || "—" %> HOLES</span><span><%= @course.complete_scorecard? ? "SCORECARD AVAILABLE" : "SCORECARD TO CONFIRM" %></span></div>
-  <% if organizer_for?(@trip) %><%= link_to "Add to trip itinerary ↗", trip_path(@trip, selected_course_id: @course.id, anchor: "schedule-round"), class: "button button-gold" %><% end %>
-</section>
-<section class="panel">
-  <p class="eyebrow">THE COURSE BOOK</p><h2>Hole-by-hole scorecard</h2>
-  <% if @course.complete_scorecard? %>
-    <p class="muted">An imported scorecard will be copied to your new hole-by-hole round. Your trip keeps its own snapshot so future directory changes cannot alter recorded results.</p>
-    <div class="table-scroll"><table class="course-db-scorecard"><thead><tr><th>Hole</th><th>Par</th><th>Stroke index</th></tr></thead><tbody>
-      <% @course.scorecard_entries.each do |hole| %><tr><td><%= "%02d" % hole[:number] %></td><td><%= hole[:par] %></td><td><%= hole[:stroke_index] %></td></tr><% end %>
-    </tbody></table></div>
-  <% else %>
-    <p class="empty">The directory does not have a complete and valid 18-hole card for this course. You can still schedule it, then manually confirm pars and stroke indexes before the round.</p>
+  <div class="course-db-profile-stats">
+    <span><%= @course.par_total ? "PAR #{@course.par_total}" : "PAR UNKNOWN" %></span>
+    <span><%= @course.holes_count || "—" %> HOLES</span>
+    <span><%= @course.available_holes %>/18 PAR VALUES</span>
+    <span><%= @course.complete_scorecard? ? "COMPLETE CARD" : "PARTIAL CARD" %></span>
+  </div>
+  <% if organizer_for?(@trip) %>
+    <div class="course-db-actions">
+      <%= link_to "Schedule this course →", trip_path(@trip, selected_course_id: @course.id, selected_tee: @selected_tee, anchor: "schedule-round"), class: "button button-gold" %>
+      <%= button_to "Refresh scorecard", refresh_trip_golf_course_path(@trip, @course), class: "small-button" %>
+    </div>
   <% end %>
 </section>
-<p class="course-db-attribution">Course data © OpenStreetMap contributors (ODbL 1.0) via OpenGolfAPI. Verify the card with the course before play.</p>
+<section class="panel">
+  <div class="course-db-section-heading">
+    <div><p class="eyebrow">REAL HOLES. REAL NUMBERS.</p><h2>Hole-by-hole scorecard</h2></div>
+    <span><%= @course.complete_scorecard? ? "Ready to copy into a round" : "Needs confirmation before competitive scoring" %></span>
+  </div>
+  <% if @course.tee_names.any? %>
+    <%= form_with url: trip_golf_course_path(@trip, @course), method: :get, class: "course-tee-select" do |f| %>
+      <%= f.label :tee, "Select tees to view yardages" %>
+      <%= f.select :tee, @course.tee_names, { selected: @selected_tee }, onchange: "this.form.requestSubmit()" %>
+      <%= f.submit "Show tees", class: "small-button" %>
+    <% end %>
+    <% if @selected_tee && (details = @course.tee_details(@selected_tee)) %>
+      <p class="course-tee-summary"><strong><%= @selected_tee %> tees</strong>
+        <% if (rating = details["rating"] || details["course_rating"]) %> · Rating <%= rating %><% end %>
+        <% if details["slope"] %> · Slope <%= details["slope"] %><% end %>
+        <% if details["total_yardage"] %> · <%= details["total_yardage"] %> yards<% end %>
+      </p>
+    <% end %>
+  <% else %>
+    <p class="muted">This course currently has no named tee-box data in the directory.</p>
+  <% end %>
+  <p class="muted">Showing available community scorecard information, including missing values. A complete 18-hole card requires real pars and unique stroke indexes 1–18; Tin Cup never fills these from guesses. Imported rounds retain their own snapshot.</p>
+  <div class="table-scroll">
+    <table class="course-db-scorecard">
+      <thead><tr><th>Hole</th><th>Par</th><th>Stroke index</th><th><%= @selected_tee.present? ? "Yards · #{@selected_tee}" : "Yards" %></th></tr></thead>
+      <tbody>
+        <% @course.display_scorecard_entries.each do |hole| %>
+          <tr><td><%= "%02d" % hole[:number] %></td><td><%= hole[:par] || "—" %></td><td><%= hole[:stroke_index] || "—" %></td><td><%= @course.yardage_for(hole, @selected_tee) || "—" %></td></tr>
+        <% end %>
+      </tbody>
+      <tfoot><tr><th>Total</th><th><%= @course.display_scorecard_entries.sum { |hole| hole[:par].to_i } %></th><th>—</th><th><%= @course.display_scorecard_entries.sum { |hole| @course.yardage_for(hole, @selected_tee).to_i } if @selected_tee %></th></tr></tfoot>
+    </table>
+  </div>
+  <% unless @course.complete_scorecard? %>
+    <p class="course-card-warning">This directory card is incomplete. You can still schedule the course, but the captain must verify the 18-hole card before match scoring begins.</p>
+  <% end %>
+</section>
+<p class="course-db-attribution">Course data © OpenStreetMap contributors (ODbL 1.0) via OpenGolfAPI. Community-maintained information may be incomplete or inaccurate—verify against the club's official scorecard.</p>

@@ -42,6 +42,8 @@ class TripsController < ApplicationController
     @rounds = @trip.rounds.order(:plays_on, :id)
     @golf_courses = GolfCourse.order(:name).limit(250)
     @selected_course_id = GolfCourse.find_by(id: params[:selected_course_id])&.id
+    @selected_tee = params[:selected_tee].to_s if @selected_course_id.present?
+    @selected_tee = nil unless GolfCourse.find_by(id: @selected_course_id)&.tee_names&.include?(@selected_tee)
     requested_view = params[:view].to_s
     @view = %w[overview play standings manage].include?(requested_view) ? requested_view : (@selected_course_id ? "manage" : "overview")
     @view = "overview" if @view == "manage" && !@can_manage

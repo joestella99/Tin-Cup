@@ -119,9 +119,12 @@
     <section class="panel" id="schedule-round">
       <p class="eyebrow">02 / THE BATTLEGROUNDS</p><h2>Schedule a round</h2>
       <div class="course-library-invite"><p>Search real courses and bring their hole data into your tournament where available.</p><%= link_to "Explore course database →", trip_golf_courses_path(@trip), class: "small-button" %></div>
-      <%= form_with model: [@trip, Round.new] do |f| %>
+      <% tee_map = @golf_courses.to_h { |course| [ course.id.to_s, course.tee_names ] } %>
+      <%= form_with model: [@trip, Round.new], data: { controller: "course-tee-picker", course_tee_picker_map_value: tee_map.to_json, course_tee_picker_selected_value: @selected_tee.to_s } do |f| %>
         <%= f.label :golf_course_id, "Course from your library" %>
-        <%= f.collection_select :golf_course_id, @golf_courses, :id, :display_name, { include_blank: "Or enter a course manually", selected: @selected_course_id } %>
+        <%= f.collection_select :golf_course_id, @golf_courses, :id, :display_name, { include_blank: "Or enter a course manually", selected: @selected_course_id }, data: { action: "change->course-tee-picker#update", course_tee_picker_target: "course" } %>
+        <%= f.label :tee_name, "Tee box (when available)" %>
+        <%= f.select :tee_name, [], { include_blank: "Choose a course first" }, data: { course_tee_picker_target: "tee" } %>
         <%= f.label :course, "Manual course name (optional if selected)" %><%= f.text_field :course, placeholder: "e.g. Pinehurst No. 2" %>
         <%= f.label :plays_on, "Date on the trip" %><%= f.date_field :plays_on, min: @trip.starts_on, max: @trip.ends_on, required: true %>
         <%= f.label :scoring_mode, "Scoring style" %><%= f.select :scoring_mode, [["Hole by hole + singles matches", "hole_by_hole"], ["18-hole totals only", "total"]] %>

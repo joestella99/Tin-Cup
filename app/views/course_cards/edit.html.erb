@@ -21,6 +21,7 @@
 <th>Hole</th>
 <th>Par</th>
 <th>Stroke index</th>
+<th>Yards</th>
 </tr>
 </thead>
 <tbody>
@@ -37,6 +38,7 @@
 <%= label_tag "index_#{hole.id}", "Hole #{hole.number} stroke index", class: "visually-hidden" %>
 <%= number_field_tag "holes[#{hole.id}][stroke_index]", hole.stroke_index, id: "index_#{hole.id}", min: 1, max: 18, required: true, disabled: locked, class: "score-input" %>
 </td>
+<td><%= hole.yardage || "—" %></td>
 </tr>
 <% end %>
 </tbody>

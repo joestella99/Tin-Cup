@@ -16,7 +16,9 @@ Rails.application.routes.draw do
     resources :invitations, only: [ :create, :destroy ]
     resources :spectator_passes, only: [ :create, :destroy ]
     resources :memberships, only: [ :destroy ]
-    resources :golf_courses, only: [ :index, :show, :create ]
+    resources :golf_courses, only: [ :index, :show, :create ] do
+      post :refresh, on: :member
+    end
     resources :teams, only: [ :create ]
     resources :players, only: [ :create, :update ]
     resources :rounds, only: [ :create, :show, :edit, :update ] do

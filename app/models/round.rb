@@ -18,14 +18,23 @@ class Round < ApplicationRecord
     raise ArgumentError, "Cannot replace a played scorecard" if hole_scores.exists? || matches.exists?
 
     holes.delete_all
-    golf_course.scorecard_entries.each { |entry| holes.create!(entry) }
+    golf_course.scorecard_entries.each do |entry|
+      holes.create!(number: entry[:number], par: entry[:par], stroke_index: entry[:stroke_index],
+        yardage: golf_course.yardage_for(entry, tee_name))
+    end
     update!(course_confirmed: true)
   end
 
   validates :course, :plays_on, presence: true
+  validate :valid_selected_tee
   validate :within_trip_dates
 
   private
+
+  def valid_selected_tee
+    return if tee_name.blank?
+    errors.add(:tee_name, "must match a tee box from the course database") unless golf_course && golf_course.tee_names.any? { |tee| tee.casecmp?(tee_name) }
+  end
 
   def within_trip_dates
     if plays_on && trip && trip.starts_on && trip.ends_on && !plays_on.between?(trip.starts_on, trip.ends_on)
