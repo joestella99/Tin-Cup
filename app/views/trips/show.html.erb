@@ -72,7 +72,7 @@
         <div class="hq-meter" role="progressbar" aria-label="<%= round.course %> scoring progress" aria-valuenow="<%= @pulse.progress(round) %>" aria-valuemin="0" aria-valuemax="100"><span style="width: <%= @pulse.progress(round) %>%"></span></div>
         <p class="hq-note"><%= @pulse.progress(round) %>% scored</p>
         <div class="hq-round-actions">
-          <%= link_to(round.hole_by_hole? && round.course_confirmed? ? "Score in Cart Mode →" : "Open scorecard →", round.hole_by_hole? && round.course_confirmed? ? cart_trip_round_path(@trip, round) : trip_round_path(@trip, round), class: "button" %>
+          <%= link_to(round.hole_by_hole? && round.course_confirmed? ? "Score in Cart Mode →" : "Open scorecard →", round.hole_by_hole? && round.course_confirmed? ? cart_trip_round_path(@trip, round) : trip_round_path(@trip, round), class: "button") %>
           <% if round.hole_by_hole? && round.course_confirmed? %><%= link_to "Full card", trip_round_path(@trip, round), class: "small-button" %><% end %>
           <% if round.hole_by_hole? %><%= link_to "Skins", trip_round_skins_game_path(@trip, round), class: "small-button" %><% end %>
         </div>
