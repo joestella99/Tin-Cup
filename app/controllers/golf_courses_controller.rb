@@ -2,7 +2,7 @@ class GolfCoursesController < ApplicationController
   before_action :load_trip
 
   def index
-    @query = params[:q].to_s.strip.first(80)
+    @query = params[:q].to_s.strip[0, 80]
     @saved = if @query.present?
       GolfCourse.where("name ILIKE :q OR city ILIKE :q OR state ILIKE :q", q: "%#{GolfCourse.sanitize_sql_like(@query)}%").order(:name).limit(30)
     else
