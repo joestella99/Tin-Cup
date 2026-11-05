@@ -27,5 +27,4 @@ class HoleScoresController < ApplicationController
     return "all" if params[:player_id] == "all"
     params[:player_id] if params[:player_id].present? && trip.players.exists?(id: params[:player_id])
   end
-  end
 end
