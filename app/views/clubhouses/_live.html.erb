@@ -1,0 +1,116 @@
+<%= turbo_frame_tag "clubhouse_live" do %>
+  <div class="live-toolbar">
+    <div class="live-toolbar-copy"><span class="live-indicator" aria-hidden="true"></span><strong>Clubhouse update</strong><span>Refreshes every 25 seconds while open</span></div>
+    <button type="button" class="small-button live-refresh-button" data-action="live-refresh#refresh">↻ Refresh</button>
+  </div>
+
+  <div class="live-stat-grid">
+    <div><span>Players in the field</span><strong><%= board.players_count %></strong></div>
+    <div><span>Round score entries</span><strong><%= board.cards_entered %></strong></div>
+    <div><span>Live singles matches</span><strong><%= board.live_matches_count %></strong></div>
+    <div><span>Latest score</span><strong class="live-time"><%= board.last_update ? l(board.last_update, format: :short) : "Awaiting tee-off" %></strong></div>
+  </div>
+
+  <% if board.round %>
+    <section class="live-feature">
+      <div>
+        <p class="eyebrow">FEATURED ROUND · <%= board.round.plays_on.strftime("%b %-d, %Y") %></p>
+        <h2><%= board.round.course %></h2>
+        <p><%= board.round.hole_by_hole? ? "Live net scoring · hole by hole" : "18-hole stroke play · final cards only" %></p>
+      </div>
+      <%= link_to "Open scorecard ↗", trip_round_path(trip, board.round), class: "button", data: { turbo_frame: "_top" } %>
+    </section>
+    <div class="live-progress-heading"><span>Round scoring progress</span><strong><%= board.round_progress %>%</strong></div>
+    <div class="live-progress-track" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="<%= board.round_progress %>" aria-label="Round scoring progress"><div style="width: <%= board.round_progress %>%"></div></div>
+
+    <div class="live-columns">
+      <section class="panel live-panel">
+        <div class="live-section-heading"><div><p class="eyebrow">THE RACE</p><h2>Round leaderboard</h2></div><span><%= board.round.hole_by_hole? ? "NET TO PAR" : "NET STROKES" %></span></div>
+        <% if board.standings.any? %>
+          <div class="live-standings">
+            <% previous_value = nil; current_place = 0 %>
+            <% board.standings.each_with_index do |standing, index| %>
+              <% value = board.round.hole_by_hole? ? standing.net_to_par : standing.net %>
+              <% if !value.nil? && value != previous_value %><% current_place = index + 1 %><% end %>
+              <div class="live-score-row <%= "live-leading" if !value.nil? && current_place == 1 %>">
+                <span class="live-position"><%= value.nil? ? "—" : current_place %></span>
+                <div class="live-player">
+                  <strong><%= standing.player.name %></strong>
+                  <small><%= standing.player.team&.name || "Independent" %> · <%= standing.holes == 18 ? "F" : "Thru #{standing.holes}" %></small>
+                </div>
+                <span class="live-gross"><%= standing.gross ? "Gross #{standing.gross}" : "No card" %></span>
+                <strong class="live-total"><%= value.nil? ? "—" : (board.round.hole_by_hole? && value.positive? ? "+#{value}" : value) %></strong>
+              </div>
+              <% previous_value = value unless value.nil? %>
+            <% end %>
+          </div>
+        <% else %>
+          <p class="empty">Add some golfers to the trip and the leaderboard will come to life.</p>
+        <% end %>
+        <p class="live-footnote"><%= board.round.hole_by_hole? ? "Provisional: players can be on different holes. Net to par reflects only entered holes, and ties share a place." : "Only submitted 18-hole totals appear in the standings. Ties share a place." %></p>
+      </section>
+
+      <aside class="panel live-panel">
+        <div class="live-section-heading"><div><p class="eyebrow">THE TEAM BATTLE</p><h2>Cup scoreboard</h2></div><span>FINAL MATCHES</span></div>
+        <% if board.cup_standings.any? %>
+          <div class="live-cup-list">
+            <% board.cup_standings.each_with_index do |entry, index| %>
+              <div class="live-cup-row">
+                <span class="live-cup-rank"><%= "%02d" % (index + 1) %></span>
+                <strong><%= entry.team.name %></strong>
+                <span><%= number_with_precision(entry.points, precision: 1, strip_insignificant_zeros: true) %> <small>pts</small></span>
+              </div>
+            <% end %>
+          </div>
+        <% else %>
+          <p class="empty">Set up teams from the trip page to get the cup race underway.</p>
+        <% end %>
+        <p class="live-footnote">One point for a win, half for a tie. In-progress matches don't award points until final.</p>
+      </aside>
+    </div>
+
+    <% if board.round.hole_by_hole? %>
+      <section class="panel live-panel">
+        <div class="live-section-heading"><div><p class="eyebrow">MATCH DAY</p><h2>Head-to-head drama</h2></div><span>LIVE + FINAL</span></div>
+        <% if board.matchups.any? %>
+          <div class="live-matches">
+            <% board.matchups.each do |matchup| %>
+              <% match = matchup.match; result = matchup.result %>
+              <article class="live-match">
+                <div class="live-match-top"><span class="match-status <%= result.status %>"><%= result.status.to_s.upcase %></span><span>THRU <%= result.through %></span></div>
+                <div class="live-match-names"><span><strong><%= match.home_player.name %></strong><small><%= match.home_player.team.name %></small></span><span class="live-versus">VS</span><span><strong><%= match.away_player.name %></strong><small><%= match.away_player.team.name %></small></span></div>
+                <p class="live-match-result">
+                  <% if result.status == :scheduled %>First tee awaits
+                  <% elsif result.leader.nil? %><%= result.status == :final ? "Halved · ½ point each" : "All square" %>
+                  <% else %><%= result.leader.name %> <%= result.status == :final ? "wins" : "leads" %> <%= result.margin %><%= result.status == :final && result.through < 18 ? " & #{18 - result.through}" : " up" %>
+                  <% end %>
+                </p>
+              </article>
+            <% end %>
+          </div>
+        <% else %>
+          <p class="empty">Once the organizer sets singles pairings, every match appears here automatically.</p>
+        <% end %>
+      </section>
+    <% end %>
+  <% else %>
+    <section class="panel live-panel"><p class="eyebrow">FIRST TEE AWAITS</p><h2>Make some golf history.</h2><p class="muted">Schedule a round on the trip page. This clubhouse will fill with scores, cup battles, and highlights as the group plays.</p><%= link_to "Set up the trip ↗", trip_path(trip), data: { turbo_frame: "_top" }, class: "button" %></section>
+  <% end %>
+
+  <section class="panel live-panel">
+    <div class="live-section-heading"><div><p class="eyebrow">THE HIGHLIGHT REEL</p><h2>Big shots, bigger stories</h2></div><span>FROM EVERY ROUND</span></div>
+    <% if board.moments.any? %>
+      <div class="live-moments">
+        <% board.moments.each do |moment| %>
+          <article class="live-moment">
+            <span class="live-moment-mark <%= moment.kind %>" aria-hidden="true"><%= moment.kind == :ace ? "★" : (moment.kind == :birdie ? "−1" : (moment.kind == :eagle ? "−2" : "−3")) %></span>
+            <div><strong><%= moment.player.name %> <span><%= moment.label %>!</span></strong><p><%= moment.round.course %> · Hole <%= moment.hole.number %> · <%= moment.strokes %> on a par <%= moment.hole.par %></p></div>
+            <time datetime="<%= moment.at.iso8601 %>"><%= moment.at.strftime("%b %-d") %></time>
+          </article>
+        <% end %>
+      </div>
+    <% else %>
+      <p class="empty">The first birdie starts the highlight reel. Every eagle, albatross, and ace gets its moment here.</p>
+    <% end %>
+  </section>
+<% end %>

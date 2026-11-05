@@ -8,6 +8,8 @@ Rails.application.routes.draw do
   post "/join/:token", to: "joins#create"
   resource :session, only: [ :new, :create, :destroy ]
   resources :trips, only: [ :index, :new, :create, :show, :edit, :update ] do
+    get "clubhouse", to: "clubhouses#show", as: :clubhouse
+    get "clubhouse/live", to: "clubhouses#live", as: :live_clubhouse
     resource :claim, only: [ :create ]
     resources :invitations, only: [ :create, :destroy ]
     resources :memberships, only: [ :destroy ]

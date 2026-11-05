@@ -1,0 +1,30 @@
+<%= link_to "← Back to the trip", trip_path(@trip), class: "back" %>
+<section class="clubhouse-hero">
+  <div>
+    <p class="eyebrow">TIN CUP / THE LIVE CLUBHOUSE</p>
+    <h1>Every shot has<br><em>a story.</em></h1>
+    <p>Follow the cup race, catch the big moments, and keep the entire group in the loop.</p>
+    <div class="clubhouse-meta"><span><%= @trip.name %></span><span><%= @trip.destination %></span></div>
+  </div>
+  <div class="clubhouse-monogram" aria-hidden="true">TC<span>18</span></div>
+</section>
+
+<% if @board.rounds.any? %>
+  <nav class="clubhouse-round-nav" aria-label="Choose a round to follow">
+    <% @board.rounds.each_with_index do |round, index| %>
+      <%= link_to trip_clubhouse_path(@trip, round_id: round.id),
+        class: "clubhouse-round-tab #{'selected' if round == @board.round}",
+        aria: { current: round == @board.round ? "page" : nil } do %>
+        <span>ROUND <%= "%02d" % (index + 1) %></span>
+        <strong><%= round.course %></strong>
+      <% end %>
+    <% end %>
+  </nav>
+<% end %>
+
+<%= turbo_frame_tag "clubhouse_live",
+  src: trip_live_clubhouse_path(@trip, round_id: @board.round&.id),
+  loading: :eager,
+  data: { controller: "live-refresh", live_refresh_interval_value: 25000 } do %>
+  <section class="panel"><p class="muted">Getting the latest from the course…</p></section>
+<% end %>

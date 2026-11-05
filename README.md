@@ -27,6 +27,14 @@
 - Course details lock after scoring or pairing starts. Teams and handicaps lock for paired players. Unplayed pairings can be removed before either player has entered scores.
 - Individual trip standings count only completed 18-hole rounds. Existing total-score rounds remain supported.
 
+## Live clubhouse
+
+- Every member of a trip can open the live clubhouse from the trip or round screen.
+- The clubhouse shows a selectable round leaderboard with provisional net-to-par performance, scoring progress, the overall team cup table, and singles match status.
+- Birdies, eagles, albatrosses, and holes-in-one from all confirmed hole-by-hole rounds populate a recent highlight reel. Corrections replace the earlier result instead of creating duplicate claims.
+- Scores are read directly from the current database and the clubhouse frame refreshes every 25 seconds while the page is visible, or instantly via the Refresh control. The clubhouse never leaks private trip data outside membership checks.
+- No additional services, database tables, push infrastructure, or secrets are required.
+
 ## Foundation
 
 - Personal accounts and a legacy organizer migration path, with session rotation and login rate limiting.
