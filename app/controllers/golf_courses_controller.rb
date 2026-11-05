@@ -27,6 +27,7 @@ class GolfCoursesController < ApplicationController
   def refresh
     raise ActiveRecord::RecordNotFound unless organizer_for?(@trip)
     course = GolfCourse.find(params[:id])
+    OpenGolfApi.expire_course!(course.external_id)
     GolfCourse.import!(OpenGolfApi.full_course(course.external_id))
     redirect_to trip_golf_course_path(@trip, course), notice: "Scorecard and tee information refreshed from the course directory."
   rescue OpenGolfApi::Unavailable, ArgumentError, ActiveRecord::RecordInvalid => error

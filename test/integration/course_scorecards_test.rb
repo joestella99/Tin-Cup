@@ -74,3 +74,28 @@ class SelectedCourseDefaultModeTest < ActionDispatch::IntegrationTest
     assert_select "select[name='round[scoring_mode]'] option[value='hole_by_hole'][selected]"
   end
 end
+
+
+class CourseYardageCorrectionTest < ActionDispatch::IntegrationTest
+  setup do
+    @old_password = ENV["ORGANIZER_PASSWORD"]
+    ENV["ORGANIZER_PASSWORD"] = "local-test-only"
+    post session_path, params: { password: ENV["ORGANIZER_PASSWORD"] }
+  end
+  teardown { ENV["ORGANIZER_PASSWORD"] = @old_password }
+
+  test "manual review of an imported course keeps tee yardages" do
+    trip = build_trip
+    course = GolfCourse.import!({ "id" => "00000000-0000-0000-0000-000000000010",
+      "course_name" => "Review Course",
+      "scorecard" => (1..18).map { |n| { "hole_number" => n, "par" => 4, "handicap_index" => n, "yardages" => { "Blue" => 360 + n } } },
+      "tee_options" => [ { "tee_name" => "Blue" } ] })
+    round = trip.rounds.create!(course: course.name, golf_course: course, plays_on: trip.starts_on,
+      scoring_mode: :hole_by_hole, tee_name: "Blue")
+    round.copy_library_scorecard!
+    params = round.holes.to_h { |hole| [ hole.id.to_s, { par: hole.par, stroke_index: hole.stroke_index } ] }
+    patch trip_round_course_card_path(trip, round), params: { holes: params }
+    assert_redirected_to trip_round_path(trip, round)
+    assert_equal 361, round.holes.find_by!(number: 1).yardage
+  end
+end

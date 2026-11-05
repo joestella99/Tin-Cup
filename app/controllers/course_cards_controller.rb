@@ -25,7 +25,7 @@ class CourseCardsController < ApplicationController
       # All writes are within the lock's transaction. Recreate the unplayed card to allow index swaps under unique constraints.
       @round.holes.destroy_all
       @holes.each do |hole|
-        @round.holes.create!(number: hole.number, **attributes.fetch(hole.id))
+        @round.holes.create!(number: hole.number, yardage: hole.yardage, **attributes.fetch(hole.id))
       end
       @round.update!(course_confirmed: true)
     end

@@ -9,10 +9,10 @@
 <% locked = !@can_manage || @round.hole_scores.exists? || @round.matches.exists? %>
 <section class="panel narrow">
 <h2>
-<%= locked ? "Confirmed card" : "Set up the holes" %>
+<%= locked ? "Confirmed card" : (@round.course_confirmed? ? "Review imported course card" : "Set up the holes") %>
 </h2>
 <p class="muted">
-<%= locked ? "Course details are read-only. Your organizer can edit them before scoring or pairing begins." : "The starting values are placeholders. Check every hole before confirming." %>
+<%= locked ? "Course details are read-only. Your organizer can edit them before scoring or pairing begins." : (@round.course_confirmed? ? "These holes were imported from the course directory. Verify the pars and stroke indexes before playing; edits preserve the selected tee yardages." : "The starting values are placeholders. Check every hole before confirming.") %>
 </p>
 <%= form_with url: trip_round_course_card_path(@trip, @round), method: :patch do %>
 <table>

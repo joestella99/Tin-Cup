@@ -45,6 +45,11 @@ class OpenGolfApi
 
   # Course detail, hole yardages and tee sets are separate upstream resources.
   # An auxiliary endpoint outage doesn't throw away an otherwise useful scorecard.
+  def self.expire_course!(id)
+    validate_id!(id)
+    %w[course holes tees].each { |section| Rails.cache.delete("open_golf/#{section}/v1/#{id}") }
+  end
+
   def self.full_course(id)
     raw = course(id).dup
     begin
