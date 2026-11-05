@@ -44,6 +44,40 @@ class RoundsController < ApplicationController
     end
   end
 
+  # Cart Mode is deliberately separate from the long-form administrative card.
+  # We remember the golfer for this trip in their current browser session.
+  def cart
+    @trip = find_trip!
+    @round = @trip.rounds.find(params[:id])
+    unless @round.hole_by_hole? && @round.course_confirmed?
+      return redirect_to trip_round_path(@trip, @round),
+        alert: "Confirm a hole-by-hole course card before Cart Mode can start."
+    end
+
+    @players = @trip.players.includes(:team).order(:name).to_a
+    session_key = "cart_player_#{@trip.id}"
+    if params[:player_id].present?
+      @scoring_player = @trip.players.find(params[:player_id])
+      session[session_key] = @scoring_player.id
+    else
+      @scoring_player = @players.find { |player| player.id == session[session_key].to_i }
+    end
+
+    return unless @scoring_player
+
+    @card = CartScorecard.new(@round, @scoring_player)
+    @hole = params[:hole].present? ? @round.holes.find_by!(number: params[:hole]) : @card.next_hole
+    @previous_score = @card.score_for(@hole)
+    @score_choices = @card.suggestions(@hole)
+    @match = @round.matches.includes(:home_player, :away_player).find do |match|
+      match.home_player_id == @scoring_player.id || match.away_player_id == @scoring_player.id
+    end
+    @match_result = MatchResult.for(@match) if @match
+    result = flash[:cart_result]
+    @cart_feedback = result if result.is_a?(Hash) &&
+      result["round_id"].to_i == @round.id && result["player_id"].to_i == @scoring_player.id
+  end
+
   def show
     @trip = find_trip!
     @round = @trip.rounds.find(params[:id])

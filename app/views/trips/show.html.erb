@@ -28,7 +28,7 @@
         <span class="hq-state"><%= @pulse.round_state(@focus_round) %></span>
         <div class="hq-meter" role="progressbar" aria-label="Round scoring progress" aria-valuenow="<%= @pulse.progress(@focus_round) %>" aria-valuemin="0" aria-valuemax="100"><span style="width: <%= @pulse.progress(@focus_round) %>%"></span></div>
         <p class="hq-note"><%= @pulse.progress(@focus_round) %>% of the field's scores recorded</p>
-        <%= link_to(@focus_round.course_confirmed? || @focus_round.total? ? "Go to scorecard →" : "Prepare this course →", @focus_round.course_confirmed? || @focus_round.total? ? trip_round_path(@trip, @focus_round) : edit_trip_round_course_card_path(@trip, @focus_round), class: "button hq-primary-action") %>
+        <%= link_to(@focus_round.hole_by_hole? && @focus_round.course_confirmed? ? "Tap to score →" : (@focus_round.course_confirmed? || @focus_round.total? ? "Go to scorecard →" : "Prepare this course →"), @focus_round.hole_by_hole? && @focus_round.course_confirmed? ? cart_trip_round_path(@trip, @focus_round) : (@focus_round.course_confirmed? || @focus_round.total? ? trip_round_path(@trip, @focus_round) : edit_trip_round_course_card_path(@trip, @focus_round)), class: "button hq-primary-action") %>
       <% else %>
         <h2>The weekend starts here.</h2>
         <p>Add the first course to put your trip on the map. Your next round will appear right here.</p>
@@ -72,7 +72,8 @@
         <div class="hq-meter" role="progressbar" aria-label="<%= round.course %> scoring progress" aria-valuenow="<%= @pulse.progress(round) %>" aria-valuemin="0" aria-valuemax="100"><span style="width: <%= @pulse.progress(round) %>%"></span></div>
         <p class="hq-note"><%= @pulse.progress(round) %>% scored</p>
         <div class="hq-round-actions">
-          <%= link_to "Open scorecard →", trip_round_path(@trip, round), class: "button" %>
+          <%= link_to(round.hole_by_hole? && round.course_confirmed? ? "Score in Cart Mode →" : "Open scorecard →", round.hole_by_hole? && round.course_confirmed? ? cart_trip_round_path(@trip, round) : trip_round_path(@trip, round), class: "button" %>
+          <% if round.hole_by_hole? && round.course_confirmed? %><%= link_to "Full card", trip_round_path(@trip, round), class: "small-button" %><% end %>
           <% if round.hole_by_hole? %><%= link_to "Skins", trip_round_skins_game_path(@trip, round), class: "small-button" %><% end %>
         </div>
       </article>

@@ -3,7 +3,20 @@ class HoleScoresController < ApplicationController
     trip = find_trip!
     round = trip.rounds.find(params[:round_id])
     hole = round.holes.find(params[:hole_id])
-    submitted = params.fetch(:strokes, ActionController::Parameters.new).permit(*trip.players.pluck(:id).map(&:to_s)).to_h
+    cart_mode = params[:cart_mode] == "1"
+    if cart_mode
+      raise ActiveRecord::RecordNotFound unless round.hole_by_hole? && round.course_confirmed?
+      cart_player = trip.players.find(params.require(:player_id))
+      if params[:save_custom] == "1"
+        raise ActionController::BadRequest, "Enter gross strokes first" if params[:custom_strokes].blank?
+        submitted = { cart_player.id.to_s => params[:custom_strokes] }
+      else
+        submitted = params.fetch(:strokes, ActionController::Parameters.new).permit(cart_player.id.to_s).to_h
+        raise ActionController::BadRequest, "Choose a hole score" unless submitted.key?(cart_player.id.to_s)
+      end
+    else
+      submitted = params.fetch(:strokes, ActionController::Parameters.new).permit(*trip.players.pluck(:id).map(&:to_s)).to_h
+    end
     round.with_lock do
       submitted.each do |player_id, strokes|
         player = trip.players.find(player_id)
@@ -15,10 +28,27 @@ class HoleScoresController < ApplicationController
         end
       end
     end
-    destination = params[:next_hole] == "1" && hole.number < 18 ? hole.number + 1 : hole.number
-    redirect_to trip_round_path(trip, round, hole: destination, player_id: focus_player_id(trip)), notice: "Hole #{hole.number} saved. Match standings updated."
+    if cart_mode
+      saved = hole.hole_scores.find_by(player_id: cart_player.id)
+      flash[:cart_result] = {
+        "round_id" => round.id, "player_id" => cart_player.id,
+        "hole" => hole.number, "par" => hole.par,
+        "strokes" => saved&.strokes, "cleared" => saved.nil?
+      }
+      destination = { player_id: cart_player.id }
+      destination[:hole] = saved.nil? ? hole.number : hole.number + 1 if saved.nil? || hole.number < 18
+      redirect_to cart_trip_round_path(trip, round, **destination), status: :see_other
+    else
+      destination = params[:next_hole] == "1" && hole.number < 18 ? hole.number + 1 : hole.number
+      redirect_to trip_round_path(trip, round, hole: destination, player_id: focus_player_id(trip)), notice: "Hole #{hole.number} saved. Match standings updated."
+    end
   rescue ActiveRecord::RecordInvalid => error
-    redirect_to trip_round_path(trip, round, hole: hole.number, player_id: focus_player_id(trip)), alert: error.record.errors.full_messages.to_sentence
+    if params[:cart_mode] == "1"
+      redirect_to cart_trip_round_path(trip, round, hole: hole.number, player_id: params[:player_id]),
+        alert: error.record.errors.full_messages.to_sentence
+    else
+      redirect_to trip_round_path(trip, round, hole: hole.number, player_id: focus_player_id(trip)), alert: error.record.errors.full_messages.to_sentence
+    end
   end
 
   private

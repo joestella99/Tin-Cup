@@ -23,6 +23,7 @@ Rails.application.routes.draw do
     resources :teams, only: [ :create, :destroy ]
     resources :players, only: [ :create, :update, :destroy ]
     resources :rounds, only: [ :create, :show, :edit, :update, :destroy ] do
+      get :cart, on: :member
       resource :scorecard, only: [ :update ]
       resource :scorecard_import, only: [ :new, :create ]
       resource :course_card, only: [ :edit, :update ]

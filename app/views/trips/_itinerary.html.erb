@@ -7,7 +7,7 @@
       <h3><time datetime="<%= day.iso8601 %>"><%= day.strftime("%A, %B %-d") %></time></h3>
       <% rounds.each do |round| %>
         <div class="itinerary-stop <%= "itinerary-next" if round == next_round %>">
-          <%= link_to trip_round_path(@trip, round), class: "itinerary-course" do %>
+          <%= link_to (round.hole_by_hole? && round.course_confirmed? ? cart_trip_round_path(@trip, round) : trip_round_path(@trip, round)), class: "itinerary-course" do %>
             <% if round == next_round %><span class="itinerary-tag">Next round</span><% end %>
             <strong><%= round.course %></strong>
             <span class="muted"><%= round.hole_by_hole? ? "Hole-by-hole scorecard" : "18-hole totals" %></span>

@@ -5,6 +5,12 @@
   <p><%= link_to "Edit round schedule", edit_trip_round_path(@trip, @round), class: "small-button" %></p>
 <% end %>
 <% if @round.hole_by_hole? %>
+  <% if @round.course_confirmed? %>
+    <section class="cart-entry-banner">
+      <div><p class="eyebrow">THE FIVE-SECOND SCORECARD</p><h2>Score it. Pocket it. Play on.</h2><p>Big one-tap scoring built for the golf cart. No typing, no digging through menus.</p></div>
+      <%= link_to "Open Cart Mode →", cart_trip_round_path(@trip, @round), class: "cart-banner-button" %>
+    </section>
+  <% end %>
   <div class="round-extras"><%= link_to "♠ Skins competition ↗", trip_round_skins_game_path(@trip, @round), class: "small-button" %><% if @can_manage && @round.course_confirmed? %><%= link_to "⚑ Auto-build pairings ↗", trip_round_pairing_suggestions_path(@trip, @round), class: "small-button" %><% end %></div>
   <% if @round.course_confirmed? %>
     <section class="score-import-banner">
