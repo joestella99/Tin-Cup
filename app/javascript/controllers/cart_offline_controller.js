@@ -37,6 +37,22 @@ export default class extends Controller {
     this.updateView()
     this.updateIndicator()
     if (this.canQueue && navigator.onLine) this.sync()
+    this.onVisibility = () => {
+      if (!document.hidden && navigator.onLine) this.sync()
+    }
+    this.onLeaving = event => {
+      if (Object.keys(this.queue).length && !navigator.onLine) {
+        event.preventDefault()
+        event.returnValue = ""
+      }
+    }
+    document.addEventListener("visibilitychange", this.onVisibility)
+    window.addEventListener("beforeunload", this.onLeaving)
+  }
+
+  disconnect() {
+    document.removeEventListener("visibilitychange", this.onVisibility)
+    window.removeEventListener("beforeunload", this.onLeaving)
   }
 
   storageAvailable() {
@@ -108,9 +124,19 @@ export default class extends Controller {
   // Intercept only the hole links inside this same card. Switching golfers
   // still uses normal Rails navigation so permissions and identity stay intact.
   jump(event) {
-    if (!this.canQueue || !this.hasFormTarget) return
-    const link = event.target.closest("a[data-cart-hole]")
-    if (!link || !this.element.contains(link)) return
+    if (!this.canQueue) return
+    const anyLink = event.target.closest("a[href]")
+    if (!anyLink || !this.element.contains(anyLink)) return
+    if (!anyLink.hasAttribute("data-cart-hole")) {
+      if (!navigator.onLine && Object.keys(this.queue).length && !event.metaKey && !event.ctrlKey) {
+        event.preventDefault()
+        this.syncIssue = "offline-nav"
+        this.updateIndicator()
+      }
+      return
+    }
+    if (!this.hasFormTarget) return
+    const link = anyLink
     const number = Number.parseInt(link.dataset.cartHole, 10)
     if (!this.holeByNumber[number] || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || event.button !== 0) return
     event.preventDefault()
@@ -355,6 +381,8 @@ export default class extends Controller {
         " saved on this device. Keep this page open; we'll retry on reconnect."
     } else if (pending && this.syncIssue === "authentication") {
       this.syncTextTarget.textContent = "Sign-in required to sync " + pending + " saved score" + (pending === 1 ? "" : "s") + "."
+    } else if (pending && this.syncIssue === "offline-nav") {
+      this.syncTextTarget.textContent = "Keep Cart Mode open while offline. Your scores are held on this device until they sync."
     } else if (pending) {
       this.syncTextTarget.textContent = this.syncing ? "Syncing " + pending + " score" + (pending === 1 ? "" : "s") + "…" :
         pending + " score" + (pending === 1 ? "" : "s") + " saved on this device · awaiting sync."
@@ -486,6 +514,14 @@ export default class extends Controller {
       this.syncing = false
       this.updateView()
       this.updateIndicator()
+      // A golfer can tap the next hole while a prior request is still
+      // in-flight. Do another pass for entries created during that request.
+      const hasNewWork = Object.keys(this.queue).some(number =>
+        !Object.prototype.hasOwnProperty.call(this.conflicts, number)
+      )
+      if (hasNewWork && !this.syncIssue && navigator.onLine) {
+        queueMicrotask(() => this.sync())
+      }
     }
   }
 
