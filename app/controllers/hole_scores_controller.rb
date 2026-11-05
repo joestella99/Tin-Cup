@@ -16,8 +16,16 @@ class HoleScoresController < ApplicationController
       end
     end
     destination = params[:next_hole] == "1" && hole.number < 18 ? hole.number + 1 : hole.number
-    redirect_to trip_round_path(trip, round, hole: destination), notice: "Hole #{hole.number} saved. Match standings updated."
+    redirect_to trip_round_path(trip, round, hole: destination, player_id: focus_player_id(trip)), notice: "Hole #{hole.number} saved. Match standings updated."
   rescue ActiveRecord::RecordInvalid => error
-    redirect_to trip_round_path(trip, round, hole: hole.number), alert: error.record.errors.full_messages.to_sentence
+    redirect_to trip_round_path(trip, round, hole: hole.number, player_id: focus_player_id(trip)), alert: error.record.errors.full_messages.to_sentence
+  end
+
+  private
+
+  def focus_player_id(trip)
+    return "all" if params[:player_id] == "all"
+    params[:player_id] if params[:player_id].present? && trip.players.exists?(id: params[:player_id])
+  end
   end
 end

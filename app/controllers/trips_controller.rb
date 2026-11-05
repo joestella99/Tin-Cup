@@ -41,6 +41,11 @@ class TripsController < ApplicationController
     @rounds = @trip.rounds.order(:plays_on, :id)
     @golf_courses = GolfCourse.order(:name).limit(250)
     @selected_course_id = GolfCourse.find_by(id: params[:selected_course_id])&.id
+    requested_view = params[:view].to_s
+    @view = %w[overview play standings manage].include?(requested_view) ? requested_view : (@selected_course_id ? "manage" : "overview")
+    @view = "overview" if @view == "manage" && !@can_manage
+    @pulse = TripPulse.new(@trip, cup_entries: @cup_entries)
+    @focus_round = @pulse.focus_round
   end
   private
 

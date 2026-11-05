@@ -20,5 +20,5 @@
     </section>
   <% end %>
   <% if @rounds.empty? %><p class="muted">Scheduled rounds will appear here.</p><% end %>
-  <% if @can_manage %><%= link_to "+ Schedule a round", "#schedule-round", class: "small-button itinerary-add" %><% end %>
+  <% if @can_manage %><%= link_to "+ Schedule a round", trip_path(@trip, view: "manage", anchor: "schedule-round"), class: "small-button itinerary-add" %><% end %>
 </section>

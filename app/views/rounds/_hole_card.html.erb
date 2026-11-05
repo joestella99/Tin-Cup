@@ -14,9 +14,19 @@
 </div>
 <%= link_to "View course card", edit_trip_round_course_card_path(@trip, @round), class: "back" %>
 </div>
+<div class="score-focus">
+  <div><p class="eyebrow">ON-COURSE MODE</p><h3>Who are you scoring for?</h3><p class="muted">Focus on one golfer to keep your screen clear, or score everyone together.</p></div>
+  <div class="score-focus-players" aria-label="Choose a golfer">
+    <%= link_to "Everyone", trip_round_path(@trip, @round, hole: @hole&.number || 1, player_id: "all"), class: "score-focus-chip #{'selected' unless @scoring_player}" %>
+    <% @scoring_players.each do |player| %>
+      <%= link_to player.name, trip_round_path(@trip, @round, hole: @hole&.number || 1, player_id: player.id), class: "score-focus-chip #{'selected' if @scoring_player == player}" %>
+    <% end %>
+  </div>
+</div>
+<div class="score-round-progress"><strong><%= @scored_hole_ids.size %> of 18 holes</strong><span><%= @scoring_player ? "Scored for #{@scoring_player.name}" : "With at least one entry" %></span></div>
 <nav class="hole-nav" aria-label="Choose hole">
 <% @round.holes.order(:number).each do |hole| %>
-<%= link_to hole.number, trip_round_path(@trip, @round, hole: hole.number), class: "hole-chip #{'selected' if hole == @hole} #{'hole-scored' if @scored_hole_ids.include?(hole.id)}", aria: {current: hole == @hole ? "page" : nil, label: "Hole #{hole.number}#{@scored_hole_ids.include?(hole.id) ? ', has scores' : '' }"} %>
+<%= link_to hole.number, trip_round_path(@trip, @round, hole: hole.number, player_id: @scoring_player&.id || ("all" if params[:player_id] == "all")), class: "hole-chip #{'selected' if hole == @hole} #{'hole-scored' if @scored_hole_ids.include?(hole.id)}", aria: {current: hole == @hole ? "page" : nil, label: "Hole #{hole.number}#{@scored_hole_ids.include?(hole.id) ? ', has scores' : '' }"} %>
 <% end %>
 </nav>
 <% if @hole %>
@@ -28,7 +38,8 @@
 </div>
 <p class="muted">Enter gross strokes. Blank clears a saved score. Partial rounds stay pending in the individual trip standings. Match results use consecutive completed holes from the first tee.</p>
 <%= form_with url: trip_round_hole_hole_scores_path(@trip, @round, @hole), method: :patch do %>
-<div class="scoring-grid">
+<%= hidden_field_tag :player_id, @scoring_player&.id || ("all" if params[:player_id] == "all") %>
+<div class="scoring-grid <%= 'focus-single' if @scoring_player %>">
   <% @players.each do |player| %>
     <% result = @results[player.id] %>
     <article class="scoring-card">
@@ -55,10 +66,10 @@
 <% end %>
 <div class="hole-pagination">
 <% if @hole.number > 1 %>
-<%= link_to "← Previous hole", trip_round_path(@trip, @round, hole: @hole.number - 1) %>
+<%= link_to "← Previous hole", trip_round_path(@trip, @round, hole: @hole.number - 1, player_id: @scoring_player&.id || ("all" if params[:player_id] == "all")) %>
 <% end %>
 <% if @hole.number < 18 %>
-<%= link_to "Next hole →", trip_round_path(@trip, @round, hole: @hole.number + 1) %>
+<%= link_to "Next hole →", trip_round_path(@trip, @round, hole: @hole.number + 1, player_id: @scoring_player&.id || ("all" if params[:player_id] == "all")) %>
 <% end %>
 </div>
 <% else %>

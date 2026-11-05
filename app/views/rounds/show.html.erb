@@ -1,4 +1,4 @@
-<%= link_to "← Back to the trip", trip_path(@trip), class: "back" %><section class="hero compact"><p class="eyebrow"><%= @trip.name %> / <%= @round.plays_on.strftime("%A, %b %-d") %></p><h1><%= @round.course %></h1><p class="lede">Finish the round. Make it official.</p></section>
+<%= link_to "← Back to the trip", trip_path(@trip), class: "back" %><section class="hero compact score-hero"><p class="eyebrow"><%= @trip.name %> / <%= @round.plays_on.strftime("%A, %b %-d") %></p><h1><%= @round.course %></h1><p class="lede">Finish the round. Make it official.</p></section>
 <% if @round.golf_course %><p class="course-source-note">Course library · <%= @round.golf_course.location %> · <%= link_to "View course information ↗", trip_golf_course_path(@trip, @round.golf_course) %></p><% end %>
 <p class="trip-actions"><%= link_to "↗ Live clubhouse", trip_clubhouse_path(@trip, round_id: @round.id), class: "small-button" %></p>
 <% if @can_manage %>

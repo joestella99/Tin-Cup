@@ -1,0 +1,31 @@
+<section class="panel hq-standings">
+  <div class="hq-section-head">
+    <div>
+      <p class="eyebrow">THE LONG GAME</p>
+      <h2>Individual standings</h2>
+    </div>
+    <% unless @view == "standings" %>
+      <%= link_to "Full standings →", trip_path(@trip, view: "standings"), class: "small-button" %>
+    <% end %>
+  </div>
+  <p class="muted">Cumulative net strokes across completed rounds. Players without every round completed remain pending.</p>
+  <div class="table-scroll">
+    <table>
+      <thead><tr><th>Place</th><th>Player</th><th>Rounds</th><th>Gross</th><th>Net</th></tr></thead>
+      <tbody>
+        <% last_net = nil; place = nil %>
+        <% (@view == "standings" ? @entries : @entries.first(5)).each_with_index do |entry, index| %>
+          <% if entry.complete && entry.net != last_net; place = index + 1; last_net = entry.net; end %>
+          <tr>
+            <td><%= entry.complete ? place : "—" %></td>
+            <td><strong><%= entry.player.name %></strong><small>HCP <%= entry.player.playing_handicap %></small></td>
+            <td><%= entry.rounds_played %>/<%= @rounds.size %></td>
+            <td><%= entry.rounds_played.positive? ? entry.gross : "—" %></td>
+            <td class="net"><%= entry.rounds_played.positive? ? entry.net : "—" %><% unless entry.complete %><small>Pending</small><% end %></td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+  <% if @entries.empty? %><p class="empty">Add your first player to start the leaderboard.</p><% end %>
+</section>
