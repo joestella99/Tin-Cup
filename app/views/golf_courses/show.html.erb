@@ -1,0 +1,20 @@
+<%= link_to "← Course directory", trip_golf_courses_path(@trip), class: "back" %>
+<section class="course-db-hero course-db-hero-small">
+  <p class="eyebrow">TIN CUP / COURSE PROFILE</p>
+  <h1><%= @course.name %></h1>
+  <p><%= @course.location.presence || "Location not listed" %></p>
+  <div class="course-db-profile-stats"><span><%= @course.par_total ? "PAR #{@course.par_total}" : "PAR TBD" %></span><span><%= @course.holes_count || "—" %> HOLES</span><span><%= @course.complete_scorecard? ? "SCORECARD AVAILABLE" : "SCORECARD TO CONFIRM" %></span></div>
+  <% if organizer_for?(@trip) %><%= link_to "Add to trip itinerary ↗", trip_path(@trip, selected_course_id: @course.id, anchor: "schedule-round"), class: "button button-gold" %><% end %>
+</section>
+<section class="panel">
+  <p class="eyebrow">THE COURSE BOOK</p><h2>Hole-by-hole scorecard</h2>
+  <% if @course.complete_scorecard? %>
+    <p class="muted">An imported scorecard will be copied to your new hole-by-hole round. Your trip keeps its own snapshot so future directory changes cannot alter recorded results.</p>
+    <div class="table-scroll"><table class="course-db-scorecard"><thead><tr><th>Hole</th><th>Par</th><th>Stroke index</th></tr></thead><tbody>
+      <% @course.scorecard_entries.each do |hole| %><tr><td><%= "%02d" % hole[:number] %></td><td><%= hole[:par] %></td><td><%= hole[:stroke_index] %></td></tr><% end %>
+    </tbody></table></div>
+  <% else %>
+    <p class="empty">The directory does not have a complete and valid 18-hole card for this course. You can still schedule it, then manually confirm pars and stroke indexes before the round.</p>
+  <% end %>
+</section>
+<p class="course-db-attribution">Course data © OpenStreetMap contributors (ODbL 1.0) via OpenGolfAPI. Verify the card with the course before play.</p>

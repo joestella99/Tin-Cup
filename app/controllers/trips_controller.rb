@@ -39,6 +39,8 @@ class TripsController < ApplicationController
     @cup_entries = CupStandings.for(@trip)
     @teams = @trip.teams.order(:name)
     @rounds = @trip.rounds.order(:plays_on, :id)
+    @golf_courses = GolfCourse.order(:name).limit(250)
+    @selected_course_id = GolfCourse.find_by(id: params[:selected_course_id])&.id
   end
   private
 

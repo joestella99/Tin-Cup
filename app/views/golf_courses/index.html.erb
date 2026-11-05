@@ -1,0 +1,42 @@
+<%= link_to "← Back to the trip", trip_path(@trip), class: "back" %>
+<section class="course-db-hero">
+  <p class="eyebrow">TIN CUP / COURSE DATABASE</p>
+  <h1>Find your next<br><em>battlefield.</em></h1>
+  <p>Real courses. Real scorecards. A better tournament starts here.</p>
+  <%= form_with url: trip_golf_courses_path(@trip), method: :get, class: "course-db-search" do |form| %>
+    <%= form.search_field :q, value: @query, placeholder: "Search by course name, e.g. Pinehurst", aria: { label: "Search golf courses" }, required: true, minlength: 2, maxlength: 80 %>
+    <%= form.submit "Find courses ↗", class: "button button-gold" %>
+  <% end %>
+  <span class="course-db-subline">POWERED BY OPENGOLFAPI · COMMUNITY COURSE DATA</span>
+</section>
+<div class="course-db-section-heading"><div><p class="eyebrow">YOUR SAVED DIRECTORY</p><h2>Ready for the itinerary.</h2></div><span><%= @saved.size %> <%= "course".pluralize(@saved.size) %></span></div>
+<% if @saved.any? %>
+<div class="course-db-grid">
+  <% @saved.each do |course| %>
+    <article class="course-db-card">
+      <div class="course-db-card-top"><span><%= course.course_type.presence || "GOLF COURSE" %></span><span><%= course.complete_scorecard? ? "18-HOLE CARD" : "COURSE INFO" %></span></div>
+      <h3><%= course.name %></h3><p><%= course.location.presence || "Location unavailable" %></p>
+      <div class="course-db-card-bottom"><span><%= course.par_total ? "PAR #{course.par_total}" : "PAR —" %></span><%= link_to "Explore course ↗", trip_golf_course_path(@trip, course), class: "small-button" %></div>
+      <% if organizer_for?(@trip) %><%= link_to "Use this course ↗", trip_path(@trip, selected_course_id: course.id, anchor: "schedule-round"), class: "course-db-use" %><% end %>
+    </article>
+  <% end %>
+</div>
+<% elsif @query.blank? %><p class="empty">Your course library is empty. Search a course below and add it to start building your tournament.</p><% end %>
+<% if @query.present? %>
+<div class="course-db-section-heading"><div><p class="eyebrow">COURSES ACROSS AMERICA</p><h2>Search results for “<%= @query %>”</h2></div><span><%= @found.size %> found</span></div>
+<% if @directory_unavailable %><p class="muted">The external course directory isn't reachable right now. Previously saved courses above still work, and you can schedule any course manually.</p><% end %>
+<div class="course-db-grid">
+  <% @found.each do |result| %>
+    <article class="course-db-card">
+      <div class="course-db-card-top"><span><%= result["course_type"].presence || "GOLF COURSE" %></span><span><%= result["state"] %></span></div>
+      <h3><%= result["course_name"] %></h3><p><%= [result["city"], result["state"]].reject(&:blank?).join(", ") %></p>
+      <div class="course-db-card-bottom"><span><%= result["par_total"].present? ? "PAR #{result["par_total"]}" : "SCORECARD ON IMPORT" %></span>
+      <% if @saved_ids.include?(result["id"].to_s) %><span class="course-db-saved">SAVED</span>
+      <% elsif organizer_for?(@trip) %><%= button_to "Add to library ↗", trip_golf_courses_path(@trip), method: :post, params: { external_id: result["id"], q: @query }, class: "small-button" %>
+      <% end %></div>
+    </article>
+  <% end %>
+</div>
+<% if @found.empty? && !@directory_unavailable %><p class="empty">No courses found for that search. Try a shorter name, or enter a custom course directly on your trip.</p><% end %>
+<% end %>
+<p class="course-db-attribution">Course data © OpenStreetMap contributors (ODbL 1.0) via OpenGolfAPI. Community-contributed information may be incomplete. Confirm the actual tee sheet, pars and handicap indexes before competitive play. <a href="https://opengolfapi.org" target="_blank" rel="noopener noreferrer">About this dataset</a></p>

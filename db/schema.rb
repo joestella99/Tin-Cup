@@ -10,9 +10,27 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_11_04_020000) do
+ActiveRecord::Schema[8.1].define(version: 2026_11_05_000000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
+
+  create_table "golf_courses", force: :cascade do |t|
+    t.string "external_id", null: false
+    t.string "name", null: false
+    t.string "city"
+    t.string "state"
+    t.string "country"
+    t.string "address"
+    t.string "course_type"
+    t.string "website"
+    t.integer "holes_count"
+    t.integer "par_total"
+    t.jsonb "scorecard", default: [], null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["external_id"], name: "index_golf_courses_on_external_id", unique: true
+    t.index ["name"], name: "index_golf_courses_on_name"
+  end
 
   create_table "hole_scores", force: :cascade do |t|
     t.bigint "hole_id", null: false
@@ -96,12 +114,14 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_04_020000) do
 
   create_table "rounds", force: :cascade do |t|
     t.bigint "trip_id", null: false
+    t.bigint "golf_course_id"
     t.string "course", null: false
     t.date "plays_on", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.string "scoring_mode", default: "total", null: false
     t.boolean "course_confirmed", default: false, null: false
+    t.index ["golf_course_id"], name: "index_rounds_on_golf_course_id"
     t.index ["trip_id"], name: "index_rounds_on_trip_id"
   end
 
@@ -157,6 +177,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_04_020000) do
   add_foreign_key "memberships", "users"
   add_foreign_key "players", "teams"
   add_foreign_key "players", "trips"
+  add_foreign_key "rounds", "golf_courses"
   add_foreign_key "rounds", "trips"
   add_foreign_key "scores", "players"
   add_foreign_key "scores", "rounds"

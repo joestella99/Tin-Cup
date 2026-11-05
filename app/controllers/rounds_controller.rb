@@ -1,12 +1,20 @@
 class RoundsController < ApplicationController
   def create
     trip = find_trip!(manage: true)
-    round = trip.rounds.build(params.require(:round).permit(:course, :plays_on, :scoring_mode))
-    if trip.with_lock { round.save }
-      redirect_to trip, notice: "Round added to the itinerary."
-    else
-      redirect_to trip, alert: round.errors.full_messages.to_sentence
+    attributes = params.require(:round).permit(:course, :plays_on, :scoring_mode, :golf_course_id)
+    selected_id = attributes.delete(:golf_course_id)
+    selected_course = selected_id.present? ? GolfCourse.find(selected_id) : nil
+    attributes[:course] = selected_course.name if selected_course
+    round = trip.rounds.build(attributes)
+    round.golf_course = selected_course
+    trip.with_lock do
+      round.save!
+      round.copy_library_scorecard!
     end
+    message = selected_course && round.course_confirmed? ? "Round scheduled with its 18-hole course card ready to play." : "Round added to the itinerary."
+    redirect_to trip, notice: message
+  rescue ActiveRecord::RecordInvalid => error
+    redirect_to trip, alert: error.record.errors.full_messages.to_sentence
   end
 
   def edit

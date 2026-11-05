@@ -27,6 +27,12 @@
 - Course details lock after scoring or pairing starts. Teams and handicaps lock for paired players. Unplayed pairings can be removed before either player has entered scores.
 - Individual trip standings count only completed 18-hole rounds. Existing total-score rounds remain supported.
 
+## Searchable golf course database
+
+Tin Cup now integrates OpenGolfAPI to search its community-maintained U.S. golf course directory. Organizers can discover and import a course, save it in PostgreSQL, and select it when scheduling a round. Cached records include course identity, location, and a scorecard when available. If an imported course has a complete, valid 18-hole par and handicap-index card, new hole-by-hole rounds copy the card and mark it confirmed automatically. An incomplete card never silently substitutes made-up values; those rounds require manual confirmation. Existing rounds are immutable snapshots even if upstream course records change. The directory degrades gracefully when the provider is unavailable; saved courses and manual entry remain available.
+
+No API key is needed at low volume. Optionally set OPEN_GOLF_API_KEY in Render for larger usage. Course data attribution is shown in the directory and course profile: © OpenStreetMap contributors (ODbL 1.0) via OpenGolfAPI. See https://courses.opengolfapi.org/legal/terms for conditions and attribution requirements.
+
 ## Tournament director: automatic pairings and skins
 
 - Every confirmed hole-by-hole round supports a gross skins side game, with a hole-by-hole board, player rankings, and automatic carryovers for ties. A skin is only decided once every golfer in the trip has entered that hole's score. Pending holes do not award skins, and unclaimed carryovers are not assigned at round end. No money is handled.

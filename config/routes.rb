@@ -13,6 +13,7 @@ Rails.application.routes.draw do
     resource :claim, only: [ :create ]
     resources :invitations, only: [ :create, :destroy ]
     resources :memberships, only: [ :destroy ]
+    resources :golf_courses, only: [ :index, :show, :create ]
     resources :teams, only: [ :create ]
     resources :players, only: [ :create, :update ]
     resources :rounds, only: [ :create, :show, :edit, :update ] do
