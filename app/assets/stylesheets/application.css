@@ -6,3 +6,52 @@ select{width:100%;padding:12px;border:1px solid #bdc8ba;border-radius:3px;backgr
 .remove-pairing{padding:0;margin-top:18px;text-decoration:underline}
 
 .auth-grid{display:grid;grid-template-columns:1fr 1fr;gap:28px;max-width:1000px}.auth-aside{background:#e9eddf}.auth-aside>p:not(.eyebrow){line-height:1.8;color:var(--muted)}.auth-links{margin-top:24px;font-size:13px}.auth-links a{text-decoration:underline}.account-name{font-size:12px;white-space:nowrap}.copy-field{display:flex;flex-wrap:wrap;gap:12px;align-items:center;margin:24px 0}.copy-field label{width:100%;margin:0}.copy-field input{flex:1;min-width:180px;font-family:monospace;font-size:12px}.copy-field span{font-size:12px;width:100%;color:var(--muted)}.member-list{margin-top:28px}.member-row{display:flex;justify-content:space-between;align-items:center;gap:20px;border-top:1px solid var(--line);padding:17px 0}.member-row small{display:block;font-size:11px;color:var(--muted);margin-top:5px}.legacy-banner{background:#e9eddf}.setup-details input[type=submit]{margin-top:16px}@media(max-width:700px){.auth-grid{grid-template-columns:1fr;gap:0}.account-name{max-width:100px;overflow:hidden;text-overflow:ellipsis}.site-header{gap:12px}}
+
+.trip-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .75rem;
+}
+.itinerary-day {
+  margin-top: 1.25rem;
+}
+.itinerary-day h3 {
+  font: inherit;
+  font-weight: 700;
+  font-size: .8rem;
+  margin-bottom: .5rem;
+}
+.itinerary-stop {
+  display: flex;
+  align-items: center;
+  gap: .75rem;
+  padding: .75rem;
+  margin-top: .5rem;
+  border: 1px solid #d9dfd2;
+  border-radius: .6rem;
+}
+.itinerary-next {
+  background: #e9eddf;
+  border-color: #a5b49a;
+}
+.itinerary-course {
+  display: grid;
+  flex: 1;
+  min-width: 0;
+  gap: .2rem;
+  overflow-wrap: anywhere;
+}
+.itinerary-tag {
+  font-size: .65rem;
+  text-transform: uppercase;
+  letter-spacing: .12em;
+  font-weight: 700;
+}
+.itinerary-edit {
+  text-decoration: underline;
+  padding: .5rem 0;
+}
+.itinerary-add {
+  display: inline-block;
+  margin-top: 1rem;
+}

@@ -8,7 +8,7 @@ class TripsController < ApplicationController
   end
 
   def create
-    @trip = Trip.new(params.require(:trip).permit(:name, :destination, :starts_on, :ends_on))
+    @trip = Trip.new(trip_params)
     Trip.transaction do
       @trip.save!
       @trip.memberships.create!(user: current_user, role: :owner) if current_user
@@ -16,6 +16,19 @@ class TripsController < ApplicationController
     redirect_to @trip, notice: "Trip created. Time to assemble the group."
   rescue ActiveRecord::RecordInvalid
     render :new, status: :unprocessable_entity
+  end
+
+  def edit
+    @trip = find_trip!(manage: true)
+  end
+
+  def update
+    @trip = find_trip!(manage: true)
+    if @trip.with_lock { @trip.update(trip_params) }
+      redirect_to @trip, notice: "Trip details updated.", status: :see_other
+    else
+      render :edit, status: :unprocessable_entity
+    end
   end
 
   def show
@@ -26,5 +39,10 @@ class TripsController < ApplicationController
     @cup_entries = CupStandings.for(@trip)
     @teams = @trip.teams.order(:name)
     @rounds = @trip.rounds.order(:plays_on, :id)
+  end
+  private
+
+  def trip_params
+    params.require(:trip).permit(:name, :destination, :starts_on, :ends_on)
   end
 end

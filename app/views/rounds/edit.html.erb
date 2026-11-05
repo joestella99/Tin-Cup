@@ -1,0 +1,17 @@
+<%= link_to "← Back to the round", trip_round_path(@trip, @round), class: "back" %>
+<section class="hero compact">
+  <p class="eyebrow"><%= @trip.name %></p>
+  <h1>Edit round schedule</h1>
+</section>
+<section class="panel narrow">
+  <% if @round.errors.any? %>
+    <p role="alert"><%= @round.errors.full_messages.to_sentence %></p>
+  <% end %>
+  <%= form_with model: [@trip, @round] do |form| %>
+    <%= form.label :course, "Course name" %>
+    <%= form.text_field :course, required: true %>
+    <%= form.label :plays_on, "Round date" %>
+    <%= form.date_field :plays_on, min: @trip.starts_on, max: @trip.ends_on, required: true %>
+    <%= form.submit "Save round schedule", class: "button" %>
+  <% end %>
+</section>

@@ -1,4 +1,7 @@
 <%= link_to "← Back to the trip", trip_path(@trip), class: "back" %><section class="hero compact"><p class="eyebrow"><%= @trip.name %> / <%= @round.plays_on.strftime("%A, %b %-d") %></p><h1><%= @round.course %></h1><p class="lede">Finish the round. Make it official.</p></section>
+<% if @can_manage %>
+  <p><%= link_to "Edit round schedule", edit_trip_round_path(@trip, @round), class: "small-button" %></p>
+<% end %>
 <% if @round.hole_by_hole? %>
   <%= render "hole_card" %>
   <%= render "matches" %>

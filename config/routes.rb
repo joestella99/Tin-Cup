@@ -7,13 +7,13 @@ Rails.application.routes.draw do
   get "/join/:token", to: "joins#show", as: :join
   post "/join/:token", to: "joins#create"
   resource :session, only: [ :new, :create, :destroy ]
-  resources :trips, only: [ :index, :new, :create, :show ] do
+  resources :trips, only: [ :index, :new, :create, :show, :edit, :update ] do
     resource :claim, only: [ :create ]
     resources :invitations, only: [ :create, :destroy ]
     resources :memberships, only: [ :destroy ]
     resources :teams, only: [ :create ]
     resources :players, only: [ :create, :update ]
-    resources :rounds, only: [ :create, :show ] do
+    resources :rounds, only: [ :create, :show, :edit, :update ] do
       resource :scorecard, only: [ :update ]
       resource :course_card, only: [ :edit, :update ]
       resources :matches, only: [ :create, :destroy ]

@@ -1,0 +1,24 @@
+<section class="panel itinerary">
+  <p class="eyebrow">THE ITINERARY</p>
+  <h2>Where we're playing</h2>
+  <% next_round = @rounds.find { |round| round.plays_on >= Date.current } %>
+  <% @rounds.group_by(&:plays_on).each do |day, rounds| %>
+    <section class="itinerary-day">
+      <h3><time datetime="<%= day.iso8601 %>"><%= day.strftime("%A, %B %-d") %></time></h3>
+      <% rounds.each do |round| %>
+        <div class="itinerary-stop <%= "itinerary-next" if round == next_round %>">
+          <%= link_to trip_round_path(@trip, round), class: "itinerary-course" do %>
+            <% if round == next_round %><span class="itinerary-tag">Next round</span><% end %>
+            <strong><%= round.course %></strong>
+            <span class="muted"><%= round.hole_by_hole? ? "Hole-by-hole scorecard" : "18-hole totals" %></span>
+          <% end %>
+          <% if @can_manage %>
+            <%= link_to "Edit", edit_trip_round_path(@trip, round), class: "itinerary-edit", aria: { label: "Edit #{round.course} schedule" } %>
+          <% end %>
+        </div>
+      <% end %>
+    </section>
+  <% end %>
+  <% if @rounds.empty? %><p class="muted">Scheduled rounds will appear here.</p><% end %>
+  <% if @can_manage %><%= link_to "+ Schedule a round", "#schedule-round", class: "small-button itinerary-add" %><% end %>
+</section>

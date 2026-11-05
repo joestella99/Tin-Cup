@@ -1,0 +1,20 @@
+<% if @trip.errors.any? %>
+  <p role="alert"><%= @trip.errors.full_messages.to_sentence %></p>
+<% end %>
+<%= form_with model: @trip do |form| %>
+  <%= form.label :name, "Trip name" %>
+  <%= form.text_field :name, required: true, placeholder: "The Boys' Annual Cup" %>
+  <%= form.label :destination %>
+  <%= form.text_field :destination, required: true, placeholder: "Pinehurst, NC" %>
+  <div class="form-grid">
+    <div>
+      <%= form.label :starts_on %>
+      <%= form.date_field :starts_on, required: true %>
+    </div>
+    <div>
+      <%= form.label :ends_on %>
+      <%= form.date_field :ends_on, required: true %>
+    </div>
+  </div>
+  <%= form.submit submit_label, class: "button" %>
+<% end %>

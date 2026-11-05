@@ -2,10 +2,27 @@ class RoundsController < ApplicationController
   def create
     trip = find_trip!(manage: true)
     round = trip.rounds.build(params.require(:round).permit(:course, :plays_on, :scoring_mode))
-    if round.save
+    if trip.with_lock { round.save }
       redirect_to trip, notice: "Round added to the itinerary."
     else
       redirect_to trip, alert: round.errors.full_messages.to_sentence
+    end
+  end
+
+  def edit
+    @trip = find_trip!(manage: true)
+    @round = @trip.rounds.find(params[:id])
+  end
+
+  def update
+    @trip = find_trip!(manage: true)
+    @round = @trip.rounds.find(params[:id])
+    changes = params.require(:round).permit(:course, :plays_on)
+
+    if @trip.with_lock { @round.update(changes) }
+      redirect_to trip_round_path(@trip, @round), notice: "Round schedule updated.", status: :see_other
+    else
+      render :edit, status: :unprocessable_entity
     end
   end
 
