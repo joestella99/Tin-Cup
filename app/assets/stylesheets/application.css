@@ -224,3 +224,9 @@ select{width:100%;padding:12px;border:1px solid #bdc8ba;border-radius:3px;backgr
 .delete-actions{display:flex;align-items:center;gap:15px;flex-wrap:wrap;margin-top:20px}
 .delete-actions .small-button{white-space:nowrap}
 @media(max-width:700px){.management-row{align-items:flex-start}.management-actions{flex-wrap:wrap;gap:5px}.delete-actions{align-items:stretch;flex-direction:column}.delete-actions .small-button{text-align:center}}
+
+.management-jump-links{display:flex;align-items:center;flex-wrap:wrap;gap:8px;margin:0 0 19px}
+.management-jump-links a{display:inline-block;min-height:42px;padding:12px 14px;border:1px solid #cedbc7;border-radius:6px;font-size:12px;font-weight:700;background:#f4f5ed}
+.management-jump-links a:hover{background:#e4edda}
+.management-jump-links .management-danger-jump{margin-left:auto;color:#a54239;border-color:#e7c3ba;background:#fff7f3}
+#manage-players,#manage-teams{scroll-margin-top:100px}

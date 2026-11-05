@@ -90,6 +90,13 @@
 
 <% elsif @view == "manage" && @can_manage %>
   <div class="hq-page-title"><div><p class="eyebrow">CAPTAIN'S DESK</p><h2>Run the trip. Not a spreadsheet.</h2><p>Four quick jobs get the competition rolling. Every setup tool lives here, away from the live action.</p></div><%= link_to "Edit trip details", edit_trip_path(@trip), class: "small-button" %></div>
+  <nav class="management-jump-links" aria-label="Jump to management tools">
+    <%= link_to "Players", "#manage-players" %>
+    <%= link_to "Rounds", "#manage-rounds" %>
+    <%= link_to "Teams", "#manage-teams" %>
+    <%= link_to "Invitations", "#trip-access" %>
+    <%= link_to "Delete trip", delete_confirmation_trip_path(@trip), class: "management-danger-jump" %>
+  </nav>
   <section class="panel hq-preflight">
     <div class="hq-section-head"><div><p class="eyebrow">THE PRE-FLIGHT CHECKLIST</p><h2><%= @pulse.completed_steps %> / <%= @pulse.steps.size %> ready</h2></div><span class="hq-preflight-count"><%= (@pulse.completed_steps.fdiv(@pulse.steps.size) * 100).round %>%</span></div>
     <div class="hq-meter"><span style="width: <%= (@pulse.completed_steps.fdiv(@pulse.steps.size) * 100).round %>%"></span></div>
@@ -133,9 +140,10 @@
       <% end %>
     </section>
   </div>
+  <%= render "trip_management", trip: @trip, rounds: @rounds, teams: @teams %>
   <section id="manage-teams"><%= render "cup", trip: @trip, entries: @cup_entries, teams: @teams %></section>
   <%= render "roster", trip: @trip, teams: @teams %>
   <%= render "access", trip: @trip, invitation: @active_invitation %>
   <%= render "spectator_access", trip: @trip, pass: @spectator_pass %>
-  <%= render "trip_management", trip: @trip, rounds: @rounds, teams: @teams %>
+  <%= render "trip_danger", trip: @trip %>
 <% end %>
