@@ -69,7 +69,7 @@ class RoundsController < ApplicationController
     @hole = params[:hole].present? ? @round.holes.find_by!(number: params[:hole]) : @card.next_hole
     @previous_score = @card.score_for(@hole)
     @score_choices = @card.suggestions(@hole)
-    @match = @round.matches.includes(:home_player, :away_player).find do |match|
+    @match = @round.matches.includes(:home_player, :away_player).detect do |match|
       match.home_player_id == @scoring_player.id || match.away_player_id == @scoring_player.id
     end
     @match_result = MatchResult.for(@match) if @match
