@@ -36,6 +36,21 @@ class HoleScoringFlowTest < ActionDispatch::IntegrationTest
     assert_select "input[disabled]"
   end
 
+
+  test "fast hole scoring saves and advances to the next hole" do
+    @round.update!(course_confirmed: true)
+    first_hole = @round.holes.find_by!(number: 1)
+    patch trip_round_hole_hole_scores_path(@trip, @round, first_hole),
+      params: { strokes: { @a.id.to_s => 4, @b.id.to_s => 5 }, next_hole: "1" }
+    assert_redirected_to trip_round_path(@trip, @round, hole: 2)
+    assert_equal [ 4, 5 ], first_hole.hole_scores.order(:player_id).pluck(:strokes)
+
+    get trip_round_path(@trip, @round, hole: 2)
+    assert_response :success
+    assert_select ".score-stepper", count: 2
+    assert_select ".hole-chip.hole-scored", minimum: 1
+  end
+
   test "unplayed pairings can be removed without locking players into a team" do
     teams = %w[Red Blue].map { |name| @trip.teams.create!(name: name) }
     @a.update!(team: teams.first)

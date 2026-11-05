@@ -76,3 +76,27 @@ select{width:100%;padding:12px;border:1px solid #bdc8ba;border-radius:3px;backgr
 .live-moments{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:12px}.live-moment{display:flex;align-items:center;gap:16px;padding:17px;border:1px solid var(--line);background:#fcfaf2}.live-moment-mark{background:#e2edda;color:#355b3c;font-weight:700;font-size:20px;min-width:48px;height:48px;border-radius:50%;display:grid;place-items:center}.live-moment-mark.ace,.live-moment-mark.albatross{background:#163e32;color:#efd086}.live-moment-mark.eagle{background:#efe0b0}.live-moment>div{flex:1;min-width:0}.live-moment strong{font-size:13px}.live-moment strong span{color:#6c8b53}.live-moment p{color:var(--muted);font-size:11px;line-height:1.5;margin:6px 0 0}.live-moment time{font-size:10px;color:var(--muted);white-space:nowrap}
 @media(max-width:850px){.clubhouse-hero{padding:42px 32px}.clubhouse-monogram{display:none}.live-columns{grid-template-columns:1fr}}
 @media(max-width:600px){.clubhouse-invite{display:block;padding:23px}.clubhouse-invite h2{font-size:25px}.clubhouse-invite .button{margin-top:10px}.clubhouse-hero{padding:34px 23px}.clubhouse-hero h1{font-size:48px}.clubhouse-round-tab{min-width:155px}.live-stat-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.live-stat-grid>div{padding:16px}.live-feature{display:block;padding:22px}.live-feature h2{font-size:29px}.live-feature .button{margin-top:15px}.live-toolbar-copy>span:last-child{display:none}.live-score-row{gap:8px;padding:10px 4px}.live-gross{display:none}.live-total{font-size:24px}.live-moments{grid-template-columns:1fr}.live-moment{gap:10px}.live-moment-mark{min-width:42px;height:42px}.live-moment time{display:none}}
+
+/* One-handed hole scoring */
+.hole-chip.hole-scored:not(.selected){border-color:#769768;background:#e8f0e2;position:relative}
+.hole-chip.hole-scored:not(.selected)::after{content:"";width:5px;height:5px;border-radius:50%;background:#517744;position:absolute;bottom:3px;left:calc(50% - 2.5px)}
+.scoring-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(270px,1fr));gap:13px;margin:24px 0 12px}
+.scoring-card{padding:19px;border:1px solid var(--line);border-radius:4px;background:#f9faf5;min-width:0}
+.scoring-card-heading{display:flex;align-items:start;justify-content:space-between;gap:12px}
+.scoring-card-heading>div:first-child{min-width:0;overflow-wrap:anywhere}
+.scoring-card-heading strong{font-size:15px}
+.scoring-card-heading small{display:block;color:var(--muted);font-size:10px;margin-top:6px}
+.scoring-card-meta{text-align:right;flex-shrink:0}
+.scoring-card-meta strong{font-family:Georgia,serif;font-size:22px}
+.scoring-card-meta small{font-size:9px;letter-spacing:1px}
+.score-stepper{display:flex;align-items:stretch;gap:6px;margin:20px 0 13px;min-height:48px}
+.score-step-button{background:#e2eadd;border:1px solid #bac8b7;color:var(--ink);border-radius:3px;cursor:pointer;font-size:23px;font-weight:600;width:43px;flex-shrink:0}
+.score-step-button:active,.score-par-button:active{background:#c5dcb7}
+.score-stepper .score-input{width:66px!important;min-width:0;max-width:none!important;text-align:center;flex:1;font-size:20px;font-weight:700;padding:6px!important;-moz-appearance:textfield}
+.score-stepper input::-webkit-inner-spin-button,.score-stepper input::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
+.score-par-button{border:1px solid #bac8b7;background:#fffef8;cursor:pointer;color:var(--ink);font-size:11px;font-weight:700;border-radius:3px;min-width:60px;padding:0 8px}
+.scoring-card-totals{border-top:1px solid var(--line);padding-top:12px;font-size:11px;color:var(--muted);margin:0}
+.scoring-card-totals strong{color:var(--ink)}
+.score-save-actions{display:flex;flex-wrap:wrap;gap:12px;justify-content:flex-end}
+.button-gold{background:#dcb76d;color:#173a30}.button-gold:hover{background:#e8c985}
+@media(max-width:600px){.scoring-grid{grid-template-columns:1fr}.scoring-card{padding:17px}.score-stepper{min-height:52px}.score-step-button{width:48px}.score-save-actions .button{flex:1;min-width:150px}.score-save-actions{position:sticky;bottom:0;background:var(--paper);padding:11px 0;z-index:2}}

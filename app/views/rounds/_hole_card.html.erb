@@ -16,7 +16,7 @@
 </div>
 <nav class="hole-nav" aria-label="Choose hole">
 <% @round.holes.order(:number).each do |hole| %>
-<%= link_to hole.number, trip_round_path(@trip, @round, hole: hole.number), class: "hole-chip #{'selected' if hole == @hole}", aria: {current: hole == @hole ? "page" : nil} %>
+<%= link_to hole.number, trip_round_path(@trip, @round, hole: hole.number), class: "hole-chip #{'selected' if hole == @hole} #{'hole-scored' if @scored_hole_ids.include?(hole.id)}", aria: {current: hole == @hole ? "page" : nil, label: "Hole #{hole.number}#{@scored_hole_ids.include?(hole.id) ? ', has scores' : '' }"} %>
 <% end %>
 </nav>
 <% if @hole %>
@@ -28,44 +28,30 @@
 </div>
 <p class="muted">Enter gross strokes. Blank clears a saved score. Partial rounds stay pending in the individual trip standings. Match results use consecutive completed holes from the first tee.</p>
 <%= form_with url: trip_round_hole_hole_scores_path(@trip, @round, @hole), method: :patch do %>
-<div class="table-scroll">
-<table>
-<thead>
-<tr>
-<th>Player</th>
-<th>This hole</th>
-<th>Holes scored</th>
-<th>Gross so far</th>
-<th>Net so far</th>
-</tr>
-</thead>
-<tbody>
-<% @players.each do |player| %>
-<% result = @results[player.id] %>
-<tr>
-<td>
-<%= label_tag "hole_score_#{player.id}", player.name %>
-<small>
-<%= player.team&.name || "Unassigned" %> · HCP <%= player.playing_handicap %>
-</small>
-</td>
-<td>
-<%= number_field_tag "strokes[#{player.id}]", @hole_scores[player.id]&.strokes, id: "hole_score_#{player.id}", min: 1, max: 30, step: 1, inputmode: "numeric", class: "score-input" %>
-</td>
-<td>
-<%= result&.holes_played || 0 %>/18</td>
-<td>
-<%= result&.gross || "—" %>
-</td>
-<td class="net">
-<%= result&.net || "—" %>
-</td>
-</tr>
-<% end %>
-</tbody>
-</table>
+<div class="scoring-grid">
+  <% @players.each do |player| %>
+    <% result = @results[player.id] %>
+    <article class="scoring-card">
+      <div class="scoring-card-heading">
+        <div><strong><%= player.name %></strong><small><%= player.team&.name || "Unassigned" %> · HCP <%= player.playing_handicap %></small></div>
+        <div class="scoring-card-meta"><strong><%= result&.holes_played || 0 %>/18</strong><small>HOLES SCORED</small></div>
+      </div>
+      <div class="score-stepper" data-controller="score-stepper" data-score-stepper-par-value="<%= @hole.par %>">
+        <button type="button" class="score-step-button" data-action="score-stepper#decrement" aria-label="Subtract a stroke for <%= player.name %>">−</button>
+        <%= number_field_tag "strokes[#{player.id}]", @hole_scores[player.id]&.strokes, id: "hole_score_#{player.id}", min: 1, max: 30, step: 1, inputmode: "numeric", class: "score-input", aria: { label: "Strokes for #{player.name} on hole #{@hole.number}" }, data: { score_stepper_target: "input" } %>
+        <button type="button" class="score-step-button" data-action="score-stepper#increment" aria-label="Add a stroke for <%= player.name %>">+</button>
+        <button type="button" class="score-par-button" data-action="score-stepper#setPar" aria-label="Set <%= player.name %> to par <%= @hole.par %>">PAR <%= @hole.par %></button>
+      </div>
+      <p class="scoring-card-totals">Round total <strong><%= result&.gross || "—" %> gross</strong><span> · </span><strong><%= result&.net || "—" %> net</strong></p>
+    </article>
+  <% end %>
 </div>
-<%= submit_tag "Save hole #{@hole.number} ↗", class: "button" %>
+<div class="score-save-actions">
+  <%= submit_tag "Save hole #{@hole.number}", class: "button" %>
+  <% if @hole.number < 18 %>
+    <%= button_tag "Save & next hole →", type: "submit", name: "next_hole", value: "1", class: "button button-gold" %>
+  <% end %>
+</div>
 <% end %>
 <div class="hole-pagination">
 <% if @hole.number > 1 %>

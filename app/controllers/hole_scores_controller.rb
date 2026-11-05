@@ -15,7 +15,8 @@ class HoleScoresController < ApplicationController
         end
       end
     end
-    redirect_to trip_round_path(trip, round, hole: hole.number), notice: "Hole #{hole.number} saved. Match standings updated."
+    destination = params[:next_hole] == "1" && hole.number < 18 ? hole.number + 1 : hole.number
+    redirect_to trip_round_path(trip, round, hole: destination), notice: "Hole #{hole.number} saved. Match standings updated."
   rescue ActiveRecord::RecordInvalid => error
     redirect_to trip_round_path(trip, round, hole: hole.number), alert: error.record.errors.full_messages.to_sentence
   end

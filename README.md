@@ -20,7 +20,7 @@
 - Create any number of teams with any number of players; no fixed two-team limit.
 - Assign players to teams, then pair singles matches between any two different teams.
 - New hole-by-hole rounds start with an 18-hole course setup. Confirm the actual par and stroke indexes before scoring; placeholder values are not presented as real course data.
-- Enter one hole at a time for the group. Individual totals and match standings recalculate on save.
+- Enter one hole at a time for the group. The mobile-friendly scorecards have one-tap par and +/- buttons, and Save & next hole advances without extra navigation. Scored holes are visibly marked. Individual totals and match standings recalculate on save.
 - Match play uses the difference between players' agreed playing handicaps. Wins earn one cup point, ties earn half a point each; unfinished matches award no points.
 - Teams share one points table across all rounds. Equal points are tied. Organizers schedule a balanced number of matches per team; there is no automatic bracket or round-robin generator.
 - Match results use consecutive scored holes from hole 1 and finish when a player is mathematically ahead, or after 18 holes. Later corrections recalculate the result.

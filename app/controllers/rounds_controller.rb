@@ -33,6 +33,7 @@ class RoundsController < ApplicationController
     @can_manage = organizer_for?(@trip)
     @scores = @round.scores.index_by(&:player_id)
     @results = RoundResults.for(@round)
+    @scored_hole_ids = @round.hole_scores.distinct.pluck(:hole_id) if @round.hole_by_hole?
     @hole = @round.holes.find_by(number: params[:hole].presence || 1) if @round.hole_by_hole?
     @hole_scores = @hole ? @hole.hole_scores.index_by(&:player_id) : {}
     @matches = @round.matches.includes(:home_player, :away_player).order(:id)
